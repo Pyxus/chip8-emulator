@@ -1,5 +1,3 @@
-// TODO: Evaluate if CPU should have any behavior or if it should be kept as a data class
-// TODO: If kept as a data class make registers public properties
 namespace Chip8
 {
     public class Cpu
@@ -11,5 +9,12 @@ namespace Chip8
         private short _programCounter;
         private byte _stackPointer;
         private short[] _stack = new short[16];
+
+        public void Cycle(Memory ram)
+        {
+            //TODO: Fetch
+            //TODO: Decode
+            //TODO: Execute
+        }
     }
 }

@@ -10,6 +10,12 @@ namespace Chip8
         private Memory _ram = new Memory();
         private Cpu _cpu = new Cpu();
 
+        public void AdjustDisplay(int windowScale, string windowTitle)
+        {
+            _display.WindowScale = windowScale;
+            _display.WindowTitle = windowTitle;
+        }
+
         public void Initialize()
         {
             /*
@@ -29,10 +35,10 @@ namespace Chip8
 
         public void Load(string path)
         {
-            //TODO: Load ROM file
+            //TODO: Load ROM file into memory
         }
 
-        public void Cycle()
+        public void Process()
         {
             long delta = 0, prevTime = DateTime.Now.Ticks, accumulator = 0;
             
@@ -45,7 +51,7 @@ namespace Chip8
                 // 60Hz update
                 while (accumulator > refreshRate)
                 {
-                    //TODO: Interpret Opcodes
+                    _cpu.Cycle(_ram);
                     accumulator -= refreshRate;
                 }
 

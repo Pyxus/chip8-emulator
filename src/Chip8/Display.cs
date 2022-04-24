@@ -4,17 +4,41 @@ namespace Chip8
 {
     public class Display
     {
+        public int WindowScale
+        {
+            set 
+            {
+                _scale = Math.Max(1, value);
+                _windowSize = (BaseX * _scale, BaseY * _scale);
+                _pixelSize = (_windowSize.X / BaseX, _windowSize.Y / BaseY);
+                Raylib.SetWindowSize(_windowSize.X, _windowSize.Y);
+            }
+            get => _scale;
+        }
+
+        public string WindowTitle
+        {
+            set
+            {
+                _title = value;
+                Raylib.SetWindowTitle(_title);
+            }
+            get => _title;
+        }
+
         private const int BaseX = 64;
         private const int BaseY = 32;
 
         private bool[,] _display = new bool[BaseX, BaseY];
+        private int _scale = 15;
+        private string _title = "Chip8";
         private (int X, int Y) _windowSize;
         private (int X, int Y) _pixelSize;
 
         public Display(int scale = 15, string title = "Chip8")
         {
-            _windowSize = (BaseX * scale, BaseY * scale);
-            _pixelSize = (_windowSize.X / BaseX, _windowSize.Y / BaseY);
+            WindowScale = scale;
+            WindowTitle = title;
 
             Raylib.InitWindow(_windowSize.X, _windowSize.Y, title);
         }
