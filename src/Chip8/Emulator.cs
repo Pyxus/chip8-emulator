@@ -44,6 +44,7 @@ namespace Chip8
             
             while (!Raylib.WindowShouldClose())
             {
+                // Test
                 delta = DateTime.Now.Ticks - prevTime;
                 prevTime = DateTime.Now.Ticks;
                 accumulator += delta;
