@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/COSC439_Chip8.csproj",
+                "${workspaceFolder}/Src/COSC439_Chip8.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/COSC439_Chip8.csproj",
+                "${workspaceFolder}/Src/COSC439_Chip8.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -33,7 +33,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/COSC439_Chip8.csproj"
+                "${workspaceFolder}/Src/COSC439_Chip8.csproj"
             ],
             "problemMatcher": "$msCompile"
         }
