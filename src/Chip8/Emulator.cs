@@ -40,7 +40,7 @@ namespace Chip8
 
         public void Process()
         {
-            long delta = 0, prevTime = DateTime.Now.Ticks, accumulator = 0;
+            long prevTime = DateTime.Now.Ticks, delta = 0, accumulator = 0;
             
             while (!Raylib.WindowShouldClose())
             {
