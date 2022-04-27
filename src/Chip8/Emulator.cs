@@ -1,5 +1,3 @@
-using Raylib_cs;
-
 namespace Chip8
 {
     public class Emulator
@@ -42,7 +40,7 @@ namespace Chip8
         {
             long prevTime = DateTime.Now.Ticks, delta = 0, accumulator = 0;
             
-            while (!Raylib.WindowShouldClose())
+            while (!_display.IsWindowClosed())
             {
                 delta = DateTime.Now.Ticks - prevTime;
                 prevTime = DateTime.Now.Ticks;

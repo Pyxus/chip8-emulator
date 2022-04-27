@@ -65,5 +65,11 @@ namespace Chip8
             if (Raylib.IsWindowReady())
                 Raylib.CloseWindow();
         }
+    
+
+        public bool IsWindowClosed()
+        {
+            return Raylib.WindowShouldClose();
+        }
     }
 }
