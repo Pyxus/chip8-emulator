@@ -11,7 +11,7 @@ namespace Chip8
             get { return Read(i); }
             set { Write(i, value); }
         }
-
+  
         public void Write(int location, byte value)
         {
             if (location <= 0x000 || location >= 0xFFF)
