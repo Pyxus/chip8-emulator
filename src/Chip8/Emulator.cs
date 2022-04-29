@@ -70,7 +70,6 @@ namespace Chip8
                 {
                     _cpu.Cycle();
                     accumulator -= RefreshRate;
-                    return;
                 }
 
                 _display.Update();

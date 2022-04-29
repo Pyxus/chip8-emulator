@@ -15,28 +15,28 @@ namespace Chip8
                                     // Basically if multiple functions are called this combined with the stack helps keep track of all their return points.
         private ushort[] _stack = new ushort[16]; // The stack stores the address the interpreter should return to when a subroutine is finished.
         private ushort _opcode;
-        private Dictionary<byte, Action> _opMap = new Dictionary<byte, Action>();
+        private Dictionary<byte, Action> _opHandlers = new Dictionary<byte, Action>();
 
         public Cpu(Memory ram)
         {
             _ram = ram;
 
-            _opMap.Add(0x0, OP_00E);
-            _opMap.Add(0x1, OP_1nnn);
-            _opMap.Add(0x2, OP_2nnn);
-            _opMap.Add(0x3, OP_3xkk);
-            _opMap.Add(0x4, OP_4xkk);
-            _opMap.Add(0x5, OP_5xy0);
-            _opMap.Add(0x6, OP_6xkk);
-            _opMap.Add(0x7, OP_7xkk);
-            _opMap.Add(0x8, OP_8xy);
-            _opMap.Add(0x9, OP_9xy0);
-            _opMap.Add(0xA, OP_Annn);
-            _opMap.Add(0xB, OP_Bnnn);
-            _opMap.Add(0xC, OP_Cxkk);
-            _opMap.Add(0xD, OP_Dxyn);
-            _opMap.Add(0xE, OP_00E);
-            _opMap.Add(0xF, OP_Fx);
+            _opHandlers.Add(0x0, OP_00E);
+            _opHandlers.Add(0x1, OP_1nnn);
+            _opHandlers.Add(0x2, OP_2nnn);
+            _opHandlers.Add(0x3, OP_3xkk);
+            _opHandlers.Add(0x4, OP_4xkk);
+            _opHandlers.Add(0x5, OP_5xy0);
+            _opHandlers.Add(0x6, OP_6xkk);
+            _opHandlers.Add(0x7, OP_7xkk);
+            _opHandlers.Add(0x8, OP_8xy);
+            _opHandlers.Add(0x9, OP_9xy0);
+            _opHandlers.Add(0xA, OP_Annn);
+            _opHandlers.Add(0xB, OP_Bnnn);
+            _opHandlers.Add(0xC, OP_Cxkk);
+            _opHandlers.Add(0xD, OP_Dxyn);
+            _opHandlers.Add(0xE, OP_00E);
+            _opHandlers.Add(0xF, OP_Fx);
         }
 
         public void Reset()
@@ -97,7 +97,7 @@ namespace Chip8
             */
             var opID = (byte) ((_opcode & 0xF000u) >> 12);
             var opHandler = OP_NULL;
-            _opMap.TryGetValue(opID, out opHandler);
+            _opHandlers.TryGetValue(opID, out opHandler);
             opHandler?.Invoke(); // This is a c# thing, basically it'll call the function stored in opHanlder
         }
 
