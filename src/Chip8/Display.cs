@@ -41,6 +41,14 @@ namespace Chip8
             WindowTitle = title;
 
             Raylib.InitWindow(_windowSize.X, _windowSize.Y, title);
+            _display[10, 10] = true;
+            _display[15, 10] = true;
+            _display[9, 14] = true;
+            _display[16, 14] = true;
+            for (int i = 0; i <= 5; i++)
+            {
+                _display[10 + i, 15] = true;
+            }
         }
 
         public void Update()
@@ -58,6 +66,11 @@ namespace Chip8
             }
 
             Raylib.EndDrawing();
+        }
+
+        public void Clear()
+        {
+            Raylib.ClearBackground(Color.BLACK);
         }
 
         public void Close()

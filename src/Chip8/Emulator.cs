@@ -2,11 +2,18 @@ namespace Chip8
 {
     public class Emulator
     {
-        const long refreshRate = (long) ((1 / 60.0) * TimeSpan.TicksPerSecond);
+        const long RefreshRate = (long) ((1 / 60.0) * TimeSpan.TicksPerSecond);
+        
+        private Display _display;
+        private Memory _ram;
+        private Cpu _cpu;
 
-        private Display _display = new Display();
-        private Memory _ram = new Memory();
-        private Cpu _cpu = new Cpu();
+        public Emulator()
+        {
+            _display = new Display();
+            _ram = new Memory();
+            _cpu = new Cpu(_ram);
+        }
 
         public void AdjustDisplay(int windowScale, string windowTitle)
         {
@@ -19,21 +26,33 @@ namespace Chip8
             /*
                 -Implement initialization procedure -
                 
-                [] Program Counter starts at 0x200
+                [X] Program Counter starts at 0x200
                 [] current opcode resets to 0
                 [] reset I register
                 [] reset stack pointer
-                [] clear dispaly
+                [X] clear dispaly
                 [] clear registers V0-VF
-                [] clear memory
-                [] load fontset into memory
+                [X] clear memory
+                [X] load fontset into memory
                 [] reset timers
             */
+            _ram.Clear();
+            _cpu.Reset();
+            _display.Clear();
+            LoadFonts();
         }
 
         public void Load(string path)
         {
-            //TODO: Load ROM file into memory
+            var storeAddress = 0x200;
+            foreach(var b in File.ReadAllBytes(path))
+            {
+                _ram.Write(storeAddress, b);
+                _ram[storeAddress] = b;
+                storeAddress++;
+            }
+
+            _ram.PrintHex();
         }
 
         public void Process()
@@ -47,16 +66,45 @@ namespace Chip8
                 accumulator += delta;
 
                 // 60Hz update
-                while (accumulator > refreshRate)
+                while (accumulator > RefreshRate)
                 {
-                    _cpu.Cycle(_ram);
-                    accumulator -= refreshRate;
+                    _cpu.Cycle();
+                    accumulator -= RefreshRate;
+                    return;
                 }
 
                 _display.Update();
             }
 
             _display.Close();
+        }
+
+        private void LoadFonts()
+        {
+            var _fontset = new byte[]
+            {
+                0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+                0x20, 0x60, 0x20, 0x20, 0x70, // 1
+                0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+                0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+                0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+                0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+                0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+                0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+                0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+                0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+                0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+                0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+                0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+                0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+                0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+                0xF0, 0x80, 0xF0, 0x80, 0x80, // F
+            };
+
+            for(var i = Memory.FontStartAddress; i < _fontset.Length; i++)
+            {
+                _ram[i] = _fontset[i];
+            }
         }
     }
 }
