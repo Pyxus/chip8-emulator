@@ -44,6 +44,8 @@ namespace Chip8
 
         public void Load(string path)
         {
+            //YOU CAN TEST BY HARDCODING BYTES HERE
+            //Or create a file with the bytes and read from that or somethig...
             var storeAddress = 0x200;
             foreach(var b in File.ReadAllBytes(path))
             {

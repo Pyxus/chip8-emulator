@@ -14,8 +14,8 @@ namespace Chip8
         private byte _stackPointer; // Stores where in the call stack the program is.
                                     // Basically if multiple functions are called this combined with the stack helps keep track of all their return points.
         private ushort[] _stack = new ushort[16]; // The stack stores the address the interpreter should return to when a subroutine is finished.
-        private ushort _opcode;
-        private Dictionary<byte, Action> _opHandlers = new Dictionary<byte, Action>();
+        private ushort _opcode; // Stores the current instruction
+        private Dictionary<byte, Action> _opHandlers = new Dictionary<byte, Action>(); // Basically a list of OpHanlder functions that can be retreived using the opID
 
         public Cpu(Memory ram)
         {
