@@ -152,20 +152,20 @@ namespace Chip8
 
         private void OP_2nnn()
         {
-            ushort address = (byte)(_opcode & 0x0FFFu);
-            _stack[_stackPointer] = _programCounter;
+            var address = (ushort) (_opcode & 0x0FFFu);
+            _stack[++_stackPointer] = _programCounter;
             _programCounter = address;
         }
 
         private void OP_3xkk()
         {
-            byte Vx = (byte)((_opcode & 0x0F00) >> 8);
-            byte kk = (byte)(_opcode & 0x00FF);
+            var Vx = (byte)((_opcode & 0x0F00) >> 8);
+            var kk = (byte)(_opcode & 0x00FF);
+
             if (_vRegisters[Vx] == kk)
             {
                 _programCounter += 2;
             }
-
         }
 
         private void OP_4xkk()
@@ -176,7 +176,6 @@ namespace Chip8
             {
                 _programCounter += 2;
             }
-
         }
 
         private void OP_5xy0()
