@@ -5,6 +5,7 @@ namespace Chip8
     public class Cpu
     {
         private Memory _ram; // Holds our memory represented by an array of 4096 bytes.
+        private Memory _vram; // Holds our video memory which will be used to draw to the display
         private byte[] _vRegisters = new byte[16]; // General purpose register. Think of it as a variables that store data current being used by the CPU
         private short _iRegister; // Specifications says its used to 'store memory addresses' but im not sure what programs would use it for...
         private byte _timerRegister; // Basically just a variable. I don't know what programs would actually use it for...
@@ -17,9 +18,10 @@ namespace Chip8
         private ushort _opcode; // Stores the current instruction
         private Dictionary<byte, Action> _opHandlers = new Dictionary<byte, Action>(); // Basically a list of OpHanlder functions that can be retreived using the opID
 
-        public Cpu(Memory ram)
+        public Cpu(Memory ram, Memory vram)
         {
             _ram = ram;
+            _vram = vram;
 
             _opHandlers.Add(0x0, OP_00E);
             _opHandlers.Add(0x1, OP_1nnn);
@@ -109,7 +111,26 @@ namespace Chip8
 
         private void OP_00E()
         {
-
+            /*
+                Where using the & similiar to how we used it in the execute method.
+                However we don't need to bit shift since the left most 0 bites are
+                ignored and of course since all but the last nibble is being set to 0
+                we end up with a value that's just that nibble.
+            */
+            if ((_opcode & 0x000Fu) == 0x0u)
+            {
+                // 00E0 - Clear display
+                _vram.Clear();
+            }
+            else if ((_opcode & 0x000Fu) == 0xEu)
+            {
+                // 00EE - Return from subroutine
+                _programCounter = _stack[--_stackPointer];
+            }
+            else
+            {
+                OP_NULL();
+            }
         }
 
         private void OP_1nnn()
