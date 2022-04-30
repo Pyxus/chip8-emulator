@@ -8,20 +8,13 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Raylib-cs" Version="4.0.0.1" />
-    <Content Include="src\Program.cs" />
-    <Content Include="src\Memory.cs" />
-    <Content Include="src\Display.cs" />
-    <Content Include="src\Cpu.cs" />
-    <Content Include="src\Chip8.cs" />
     <Content Include="src\Chip8\Emulator.cs" />
-    <Content Include="src\Chip8\Chip8.cs" />
     <Content Include="src\Chip8\Components\Cpu.cs" />
     <Content Include="src\Chip8\Components\Display.cs" />
     <Content Include="src\Chip8\Components\Memory.cs" />
     <Content Include="src\Chip8\Memory.cs" />
     <Content Include="src\Chip8\Display.cs" />
     <Content Include="src\Chip8\Cpu.cs" />
-    <Content Include="src\OpenTK\Window.cs" />
     <PackageReference Include="SFML.Net" Version="2.5.0" />
   </ItemGroup>
 </Project>
