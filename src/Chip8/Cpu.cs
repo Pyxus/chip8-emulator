@@ -75,7 +75,7 @@ namespace Chip8
                 [0000101010010001]
                 End result you have a 16-bit (or 2 byte) value containing the opcode
             */
-            _opcode = (ushort) ((_ram[_programCounter] << 8) | _ram[_programCounter + 1]);
+            _opcode = (ushort)((_ram[_programCounter] << 8) | _ram[_programCounter + 1]);
             _programCounter += 2; // Incremeted twice since we read 2 bytes at a time above
         }
 
@@ -95,7 +95,7 @@ namespace Chip8
                 However aftering &ing the value is still 16 bit and we only need the first 4 so we bit shift to the right by 12.
                 [1101000000000000] >> 12 -> [1101]
             */
-            var opID = (byte) ((_opcode & 0xF000u) >> 12);
+            var opID = (byte)((_opcode & 0xF000u) >> 12);
             var opHandler = OP_NULL;
             _opHandlers.TryGetValue(opID, out opHandler);
             opHandler?.Invoke(); // This is a c# thing, basically it'll call the function stored in opHanlder
@@ -114,41 +114,178 @@ namespace Chip8
 
         private void OP_1nnn()
         {
+            ushort addr = (byte)(_opcode & 0x0FFFu);
+            _programCounter = addr;
 
         }
 
         private void OP_2nnn()
         {
+            ushort addr = (byte)(_opcode & 0x0FFFu);
+            _stack[_stackPointer] = _programCounter;
+            _programCounter = addr;
+
+
 
         }
 
         private void OP_3xkk()
         {
+            byte Vx = (byte)((_opcode & 0x0F00) >> 8);
+            byte kk = (byte)(_opcode & 0x00FF);
+            if (_vRegisters[Vx] == kk)
+            {
+                _programCounter += 2;
+            }
 
         }
 
         private void OP_4xkk()
         {
+            byte Vx = (byte)((_opcode & 0x0F00) >> 8);
+            byte kk = (byte)(_opcode & 0x00FF);
+            if (_vRegisters[Vx] != kk)
+            {
+                _programCounter += 2;
+            }
 
         }
 
         private void OP_5xy0()
         {
-   
+            byte Vx = (byte)((_opcode & 0x0F00) >> 8);
+            byte Vy = (byte)((_opcode & 0x0F00) << 8);
+            if (_vRegisters[Vx] == _vRegisters[Vy])
+            {
+                _programCounter += 2;
+            }
         }
 
         private void OP_6xkk()
         {
-            
+            byte Vx = (byte)((_opcode & 0x0F00) >> 8);
+            byte kk = (byte)(_opcode & 0x00FF);
+            _vRegisters[Vx] = kk;
         }
 
         private void OP_7xkk()
         {
+            byte Vx = (byte)((_opcode & 0x0F00) >> 8);
+            byte kk = (byte)(_opcode & 0x00FF);
+            _vRegisters[Vx] += kk;
 
         }
-
         private void OP_8xy()
         {
+            switch (_opcode & 0x000f)
+            {
+                case 0:
+                    OP_8xy0();
+                    break;
+
+                case 1:
+                    OP_8xy1();
+                    break;
+
+                case 2:
+                    OP_8xy2();
+                    break;
+
+                case 3:
+                    OP_8xy1();
+                    break;
+
+                case 4:
+                    OP_8xy1();
+
+                    break;
+
+                case 5:
+                    OP_8xy1();
+
+                    break;
+
+                case 6:
+                    OP_8xy1();
+
+                    break;
+
+                case 7:
+                    OP_8xy1();
+
+                    break;
+                case 0xE:
+                    OP_8xyE();
+
+                    break;
+
+                default:
+                    OP_NULL();
+
+                    break;
+            }
+
+
+        }
+        private void OP_8xy0()
+        {
+            byte Vx = (byte)((_opcode & 0x0F00) >> 8);
+            byte Vy = (byte)((_opcode & 0x00F0) >> 4);
+            _vRegisters[Vx] = _vRegisters[Vy];
+
+
+        }
+        private void OP_8xy1()
+        {
+            byte Vx = (byte)((_opcode & 0x0F00) >> 8);
+            byte Vy = (byte)((_opcode & 0x00F0) >> 4);
+            _vRegisters[Vx] |= _vRegisters[Vy];
+
+        }
+        private void OP_8xy2()
+        {
+            byte Vx = (byte)((_opcode & 0x0F00) >> 8);
+            byte Vy = (byte)((_opcode & 0x00F0) >> 8);
+            _vRegisters[Vx] &= _vRegisters[Vy];
+
+        }
+        private void OP_8xy3()
+        {
+            byte Vx = (byte)((_opcode & 0x0F00) >> 8);
+            byte Vy = (byte)((_opcode & 0x00F0) >> 4);
+            _vRegisters[Vx] ^= _vRegisters[Vy];
+
+        }
+        private void OP_8xy4()
+        {
+            byte Vx = (byte)((_opcode & 0x0F00) >> 8);
+            byte Vy = (byte)((_opcode & 0x00F0) >> 4);
+            _vRegisters[Vx] += _vRegisters[Vy];
+            if (_vRegisters[Vx] > 255){
+               byte Vf = 1;
+            }else
+                byte Vf = 0;
+
+
+        }
+        private void OP_8xy5()
+        {
+      
+
+        }
+        private void OP_8xy6()
+        {
+           
+
+        }
+        private void OP_8xy7()
+        {
+          
+
+        }
+        private void OP_8xyE()
+        {
+        
 
         }
 
@@ -181,6 +318,9 @@ namespace Chip8
         {
 
         }
-        
+
     }
 }
+
+
+
