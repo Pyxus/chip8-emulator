@@ -37,7 +37,7 @@ namespace Chip8
             _opHandlers.Add(0xB, OP_Bnnn);
             _opHandlers.Add(0xC, OP_Cxkk);
             _opHandlers.Add(0xD, OP_Dxyn);
-            _opHandlers.Add(0xE, OP_00E);
+            _opHandlers.Add(0xE, OP_Ex);
             _opHandlers.Add(0xF, OP_Fx);
         }
 
@@ -105,8 +105,7 @@ namespace Chip8
 
         private void OP_NULL()
         {
-            // If this is ever call that means an invalid instruction was read
-            // Maybe print an error or something
+            Console.WriteLine("Invalid Instruction read");
         }
 
         private void OP_00E()
@@ -119,13 +118,11 @@ namespace Chip8
             */
             if ((_opcode & 0x000Fu) == 0x0u)
             {
-                // 00E0 - Clear display
-                _vram.Clear();
+                OP_OOEO();
             }
             else if ((_opcode & 0x000Fu) == 0xEu)
             {
-                // 00EE - Return from subroutine
-                _programCounter = _stack[--_stackPointer];
+                OP_OOEE();
             }
             else
             {
@@ -133,21 +130,31 @@ namespace Chip8
             }
         }
 
+        // UNTESTED
+        private void OP_OOEO()
+        {
+            _vram.Clear();
+        }
+
+        // UNTESTED
+        private void OP_OOEE()
+        {
+            _programCounter = _stack[--_stackPointer];
+        }
+
+        // UNTESTED
         private void OP_1nnn()
         {
-            ushort addr = (byte)(_opcode & 0x0FFFu);
-            _programCounter = addr;
-
+            var address = (ushort) (_opcode & 0x0FFFu);
+            _programCounter = address;
         }
+
 
         private void OP_2nnn()
         {
-            ushort addr = (byte)(_opcode & 0x0FFFu);
+            ushort address = (byte)(_opcode & 0x0FFFu);
             _stack[_stackPointer] = _programCounter;
-            _programCounter = addr;
-
-
-
+            _programCounter = address;
         }
 
         private void OP_3xkk()
@@ -200,49 +207,35 @@ namespace Chip8
         {
             switch (_opcode & 0x000f)
             {
-                case 0:
+                case 0x0:
                     OP_8xy0();
                     break;
-
-                case 1:
+                case 0x1:
                     OP_8xy1();
                     break;
-
-                case 2:
+                case 0x2:
                     OP_8xy2();
                     break;
-
-                case 3:
+                case 0x3:
                     OP_8xy1();
                     break;
-
-                case 4:
+                case 0x4:
                     OP_8xy1();
-
                     break;
-
-                case 5:
+                case 0x5:
                     OP_8xy1();
-
                     break;
-
-                case 6:
+                case 0x6:
                     OP_8xy1();
-
                     break;
-
-                case 7:
+                case 0x7:
                     OP_8xy1();
-
                     break;
                 case 0xE:
                     OP_8xyE();
-
                     break;
-
                 default:
                     OP_NULL();
-
                     break;
             }
 
@@ -279,6 +272,7 @@ namespace Chip8
         }
         private void OP_8xy4()
         {
+            /*
             byte Vx = (byte)((_opcode & 0x0F00) >> 8);
             byte Vy = (byte)((_opcode & 0x00F0) >> 4);
             _vRegisters[Vx] += _vRegisters[Vy];
@@ -286,8 +280,7 @@ namespace Chip8
                byte Vf = 1;
             }else
                 byte Vf = 0;
-
-
+            */
         }
         private void OP_8xy5()
         {
@@ -331,6 +324,11 @@ namespace Chip8
         }
 
         private void OP_Dxyn()
+        {
+
+        }
+
+        private void OP_Ex()
         {
 
         }
