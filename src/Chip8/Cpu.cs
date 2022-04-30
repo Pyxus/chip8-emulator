@@ -7,15 +7,16 @@ namespace Chip8
         private Memory _ram; // Holds our memory represented by an array of 4096 bytes.
         private Memory _vram; // Holds our video memory which will be used to draw to the display
         private byte[] _vRegisters = new byte[16]; // General purpose register. Think of it as a variables that store data current being used by the CPU
-        private short _iRegister; // Specifications says its used to 'store memory addresses' but im not sure what programs would use it for...
-        private byte _timerRegister; // Basically just a variable. I don't know what programs would actually use it for...
+        private ushort _iRegister; // Specifications says its used to 'store memory addresses' but im not sure what programs would use it for...
+        private byte _soundTimer; // Basically just a variable. I don't know what programs would actually use it for...
                                      // But we don't need to know that in order to implement it. 
-        private byte _delayRegister; // SImilar case to the timer
+        private byte _delayTimer; // SImilar case to the timer
         private ushort _programCounter; // Tells where in memory the next instruction should be read
         private byte _stackPointer; // Stores where in the call stack the program is.
                                     // Basically if multiple functions are called this combined with the stack helps keep track of all their return points.
         private ushort[] _stack = new ushort[16]; // The stack stores the address the interpreter should return to when a subroutine is finished.
         private ushort _opcode; // Stores the current instruction
+        private Random _random = new Random();
         private Dictionary<byte, Action> _opHandlers = new Dictionary<byte, Action>(); // Basically a list of OpHanlder functions that can be retreived using the opID
 
         public Cpu(Memory ram, Memory vram)
@@ -49,7 +50,13 @@ namespace Chip8
         public void Cycle()
         {
             Fetch();
-            Execute();
+            DecodeAndExecute();
+
+            if (_delayTimer > 0)
+                _delayTimer--;
+            
+            if (_soundTimer > 0)
+                _soundTimer--;
         }
 
         private void Fetch()
@@ -81,7 +88,7 @@ namespace Chip8
             _programCounter += 2; // Incremeted twice since we read 2 bytes at a time above
         }
 
-        private void Execute()
+        private void DecodeAndExecute()
         {
             /*
                 For our decoding we use the first 4 bits (nibble) as an ID to call the appropriate procedure. 
@@ -170,8 +177,9 @@ namespace Chip8
 
         private void OP_4xkk()
         {
-            byte Vx = (byte)((_opcode & 0x0F00) >> 8);
-            byte kk = (byte)(_opcode & 0x00FF);
+            var Vx = (byte)((_opcode & 0x0F00) >> 8);
+            var kk = (byte)(_opcode & 0x00FF);
+
             if (_vRegisters[Vx] != kk)
             {
                 _programCounter += 2;
@@ -180,8 +188,9 @@ namespace Chip8
 
         private void OP_5xy0()
         {
-            byte Vx = (byte)((_opcode & 0x0F00) >> 8);
-            byte Vy = (byte)((_opcode & 0x0F00) << 8);
+            var Vx = (byte)((_opcode & 0x0F00) >> 8);
+            var Vy = (byte)((_opcode & 0x0F00) << 8);
+
             if (_vRegisters[Vx] == _vRegisters[Vy])
             {
                 _programCounter += 2;
@@ -190,18 +199,21 @@ namespace Chip8
 
         private void OP_6xkk()
         {
-            byte Vx = (byte)((_opcode & 0x0F00) >> 8);
-            byte kk = (byte)(_opcode & 0x00FF);
+            var Vx = (byte)((_opcode & 0x0F00) >> 8);
+            var kk = (byte)(_opcode & 0x00FF);
+            
             _vRegisters[Vx] = kk;
         }
 
         private void OP_7xkk()
         {
-            byte Vx = (byte)((_opcode & 0x0F00) >> 8);
-            byte kk = (byte)(_opcode & 0x00FF);
+            var Vx = (byte)((_opcode & 0x0F00) >> 8);
+            var kk = (byte)(_opcode & 0x00FF);
+
             _vRegisters[Vx] += kk;
 
         }
+
         private void OP_8xy()
         {
             switch (_opcode & 0x000f)
@@ -240,91 +252,114 @@ namespace Chip8
 
 
         }
+
         private void OP_8xy0()
         {
-            byte Vx = (byte)((_opcode & 0x0F00) >> 8);
-            byte Vy = (byte)((_opcode & 0x00F0) >> 4);
+            var Vx = (byte)((_opcode & 0x0F00) >> 8);
+            var Vy = (byte)((_opcode & 0x00F0) >> 4);
+
             _vRegisters[Vx] = _vRegisters[Vy];
-
-
         }
+
         private void OP_8xy1()
         {
-            byte Vx = (byte)((_opcode & 0x0F00) >> 8);
-            byte Vy = (byte)((_opcode & 0x00F0) >> 4);
-            _vRegisters[Vx] |= _vRegisters[Vy];
+            var Vx = (byte)((_opcode & 0x0F00) >> 8);
+            var Vy = (byte)((_opcode & 0x00F0) >> 4);
 
+            _vRegisters[Vx] |= _vRegisters[Vy];
         }
+
         private void OP_8xy2()
         {
-            byte Vx = (byte)((_opcode & 0x0F00) >> 8);
-            byte Vy = (byte)((_opcode & 0x00F0) >> 8);
+            var Vx = (byte)((_opcode & 0x0F00) >> 8);
+            var Vy = (byte)((_opcode & 0x00F0) >> 4);
             _vRegisters[Vx] &= _vRegisters[Vy];
 
         }
+
         private void OP_8xy3()
         {
-            byte Vx = (byte)((_opcode & 0x0F00) >> 8);
-            byte Vy = (byte)((_opcode & 0x00F0) >> 4);
+            var Vx = (byte)((_opcode & 0x0F00) >> 8);
+            var Vy = (byte)((_opcode & 0x00F0) >> 4);
             _vRegisters[Vx] ^= _vRegisters[Vy];
 
         }
         private void OP_8xy4()
         {
-            /*
-            byte Vx = (byte)((_opcode & 0x0F00) >> 8);
-            byte Vy = (byte)((_opcode & 0x00F0) >> 4);
-            _vRegisters[Vx] += _vRegisters[Vy];
-            if (_vRegisters[Vx] > 255){
-               byte Vf = 1;
-            }else
-                byte Vf = 0;
-            */
+            var Vx = (byte)((_opcode & 0x0F00) >> 8);
+            var Vy = (byte)((_opcode & 0x00F0) >> 4);
+            var sum = _vRegisters[Vx] + _vRegisters[Vy];
+
+            _vRegisters[0xF] =  (byte) (sum > 0xFF ? 1 : 0);
+            _vRegisters[Vx] = (byte) (sum & 0xFF);
         }
+        
         private void OP_8xy5()
         {
-      
+            var Vx = (byte)((_opcode & 0x0F00) >> 8);
+            var Vy = (byte)((_opcode & 0x00F0) >> 4);
 
+            _vRegisters[0xF] = (byte) (_vRegisters[Vx] > _vRegisters[Vy] ? 1 : 0);
+            _vRegisters[Vx] -= _vRegisters[Vy];
         }
+
         private void OP_8xy6()
         {
-           
-
+            var Vx = (byte)((_opcode & 0x0F00) >> 8);
+            
+            _vRegisters[0xF] = (byte) (_vRegisters[Vx] & 0x1);
+            _vRegisters[Vx] >>= 1;   
         }
+
         private void OP_8xy7()
         {
-          
+            var Vx = (byte)((_opcode & 0x0F00) >> 8);
+            var Vy = (byte)((_opcode & 0x00F0) >> 4);
 
+            _vRegisters[0xF] = (byte) (_vRegisters[Vy] > _vRegisters[Vx] ? 1 : 0);
+            _vRegisters[Vx] = (byte) (_vRegisters[Vy] - _vRegisters[Vx]);
         }
+
         private void OP_8xyE()
         {
-        
-
+            var Vx = (byte)((_opcode & 0x0F00) >> 8);
+            
+            _vRegisters[0xF] = (byte) ((_vRegisters[Vx] & 0x80) >> 7);
+            _vRegisters[Vx] <<= 1;   
         }
 
         private void OP_9xy0()
         {
+            var Vx = (byte)((_opcode & 0x0F00) >> 8);
+            var Vy = (byte)((_opcode & 0x00F0) >> 4);
 
+            if (_vRegisters[Vx] != _vRegisters[Vy])
+            {
+                _programCounter += 2;
+            }
         }
 
         private void OP_Annn()
         {
-
+            _iRegister = (ushort) (_opcode & 0x0FFF);
         }
 
         private void OP_Bnnn()
         {
-
+            _programCounter = (ushort) (_vRegisters[0] + (_opcode & 0xFFF));
         }
 
         private void OP_Cxkk()
         {
+            var Vx = (byte) ((_opcode & 0x0F00) >> 8);
+            var kk = (byte) (_opcode & 0x00FF);
 
+            _vRegisters[Vx] = (byte) (_random.Next(Byte.MaxValue) & kk);
         }
 
         private void OP_Dxyn()
         {
-
+            // Dispaly needs to be configured for this to work
         }
 
         private void OP_Ex()
@@ -332,11 +367,65 @@ namespace Chip8
 
         }
 
+        private void OP_Ex9E()
+        {
+            // Keypad needs to be set up for this instruction to work
+        }
+
+        private void OP_ExA1()
+        {
+            // Keypad needs to be set up for this instruction to work
+        }
+
         private void OP_Fx()
         {
 
         }
 
+        private void OP_Fx07()
+        {
+
+        }
+
+        private void OP_Fx0A()
+        {
+
+        }
+
+        private void OP_Fx015()
+        {
+
+        }
+
+        private void OP_Fx018()
+        {
+
+        }
+
+        private void OP_Fx01E()
+        {
+
+        }
+
+        private void OP_Fx029()
+        {
+
+        }
+
+        private void OP_Fx033()
+        {
+
+        }
+
+        private void OP_Fx055()
+        {
+
+        }
+
+        private void OP_Fx065()
+        {
+
+        }
     }
 }
 
