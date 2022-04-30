@@ -3,16 +3,20 @@ namespace Chip8
     public class Emulator
     {
         const long RefreshRate = (long) ((1 / 60.0) * TimeSpan.TicksPerSecond);
+        const int InterpreterEndAddress = 0x200;
+        const int FontStartAddress = 0x50;
         
         private Display _display;
         private Memory _ram;
+        private Memory _vram;
         private Cpu _cpu;
 
         public Emulator()
         {
+            _ram = new Memory(4096);
+            _vram = new Memory(64*32);
             _display = new Display();
-            _ram = new Memory();
-            _cpu = new Cpu(_ram);
+            _cpu = new Cpu(_ram, _vram);
         }
 
         public void AdjustDisplay(int windowScale, string windowTitle)
@@ -102,7 +106,7 @@ namespace Chip8
                 0xF0, 0x80, 0xF0, 0x80, 0x80, // F
             };
 
-            for(var i = Memory.FontStartAddress; i < _fontset.Length; i++)
+            for(var i = FontStartAddress; i < _fontset.Length; i++)
             {
                 _ram[i] = _fontset[i];
             }

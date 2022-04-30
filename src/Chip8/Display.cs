@@ -70,7 +70,13 @@ namespace Chip8
 
         public void Clear()
         {
-            Raylib.ClearBackground(Color.BLACK);
+            for (int x = 0; x < BaseX; x++)
+            {
+                for (int y = 0; y < BaseY; y++)
+                {
+                    _display[x, y] = false;
+                }
+            }
         }
 
         public void Close()
