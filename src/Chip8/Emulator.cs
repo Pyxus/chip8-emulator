@@ -3,8 +3,8 @@ namespace Chip8
     public class Emulator
     {
         const long RefreshRate = (long) ((1 / 60.0) * TimeSpan.TicksPerSecond);
-        const int InterpreterEndAddress = 0x200;
-        const int FontStartAddress = 0x50;
+        public static ushort InterpreterEndAddress = 0x200;
+        public static byte FontStartAddress = 0x50;
         
         private Display _display;
         private Memory _ram;
@@ -46,7 +46,7 @@ namespace Chip8
                 Console.WriteLine("WARNING: Chip8 files typically end with the exntesion '.ch8'. This file may not contain chip8 code.");
             }
 
-            var storeAddress = 0x200;
+            var storeAddress = InterpreterEndAddress;
             foreach(var b in File.ReadAllBytes(path))
             {
                 _ram.Write(storeAddress, b);
