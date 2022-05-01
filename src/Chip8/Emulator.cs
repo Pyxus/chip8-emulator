@@ -10,36 +10,22 @@ namespace Chip8
         private Memory _ram;
         private Memory _vram;
         private Cpu _cpu;
+        private Debugger? _debugger;
 
-        public Emulator()
+        public Emulator(bool isDebuggerEnabled = false)
         {
+            if (isDebuggerEnabled)
+                _debugger = new Debugger();
+
             _ram = new Memory(4096);
             _vram = new Memory(64*32);
-            _display = new Display();
+            _display = new Display(_vram.AsReadOnly());
             _cpu = new Cpu(_ram, _vram);
-        }
-
-        public void AdjustDisplay(int windowScale, string windowTitle)
-        {
-            _display.WindowScale = windowScale;
-            _display.WindowTitle = windowTitle;
         }
 
         public void Initialize()
         {
-            /*
-                -Implement initialization procedure -
-                
-                [X] Program Counter starts at 0x200
-                [] current opcode resets to 0
-                [] reset I register
-                [] reset stack pointer
-                [X] clear dispaly
-                [] clear registers V0-VF
-                [X] clear memory
-                [X] load fontset into memory
-                [] reset timers
-            */
+            _vram.Clear();
             _ram.Clear();
             _cpu.Reset();
             _display.Clear();
@@ -48,8 +34,17 @@ namespace Chip8
 
         public void Load(string path)
         {
-            //YOU CAN TEST BY HARDCODING BYTES HERE
-            //Or create a file with the bytes and read from that or somethig...
+            if (!File.Exists(path))
+            {
+                Console.WriteLine("ERROR: Failed to read file, path may be invalid");
+                return;
+            }
+
+            if (Path.GetExtension(path) != ".ch8")
+            {
+                Console.WriteLine("WARNING: Chip8 files typically end with the exntesion '.ch8'. This file may not contain chip8 code.");
+            }
+
             var storeAddress = 0x200;
             foreach(var b in File.ReadAllBytes(path))
             {
@@ -57,15 +52,15 @@ namespace Chip8
                 _ram[storeAddress] = b;
                 storeAddress++;
             }
-
-            _ram.PrintHex();
+            
+            _display.SetWindowTitle(Path.GetFileName(path));
         }
 
         public void Process()
         {
             long prevTime = DateTime.Now.Ticks, delta = 0, accumulator = 0;
             
-            while (!_display.IsWindowClosed())
+            while (_display.IsWindowOpen())
             {
                 delta = DateTime.Now.Ticks - prevTime;
                 prevTime = DateTime.Now.Ticks;
@@ -74,14 +69,20 @@ namespace Chip8
                 // 60Hz update
                 while (accumulator > RefreshRate)
                 {
-                    _cpu.Cycle();
+                    //_cpu.Cycle();
                     accumulator -= RefreshRate;
                 }
 
                 _display.Update();
-            }
 
-            _display.Close();
+                if (_debugger != null)
+                {
+                    _debugger.Update(_cpu.Dump(), _ram.Dump(InterpreterEndAddress, _ram.Size, 0x10), _vram.Dump());
+
+                    if (!_debugger.IsWindowOpen())
+                        _display.Close();
+                }
+            }
         }
 
         private void LoadFonts()

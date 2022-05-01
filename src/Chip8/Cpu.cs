@@ -1,3 +1,4 @@
+using System.Text;
 using System.Reflection.Emit;
 using System.Collections.Generic;
 namespace Chip8
@@ -44,6 +45,8 @@ namespace Chip8
 
         public void Reset()
         {
+            _soundTimer = 0;
+            _delayTimer = 0;
             _programCounter = 0x200; // 0x00 to 0x1FF are reserved so the program counter starts at 0x200
         }
 
@@ -57,6 +60,28 @@ namespace Chip8
             
             if (_soundTimer > 0)
                 _soundTimer--;
+        }
+
+        public string Dump()
+        {
+            var sb = new StringBuilder();
+            sb.AppendFormat("Op: {0:X4}\n\n", _opcode);
+            sb.AppendFormat("PC: {0:X2}\n", _programCounter);
+            sb.AppendFormat("I: {0:X2}\n", _iRegister);
+
+            for (var i = 0; i < _vRegisters.Length; i++)
+            {
+                sb.AppendFormat("V{0:X1}: {0:X2}\n", i, _vRegisters[i]);
+            }
+
+            sb.AppendFormat("\nSP: {0:X2}\n", _stackPointer);
+
+            for (var i = 0; i < _stack.Length; i++)
+            {
+                sb.AppendFormat("Stack[{0:X1}]: {0:x2}\n", i, _stack[i]);
+            }
+
+            return sb.ToString();
         }
 
         private void Fetch()
