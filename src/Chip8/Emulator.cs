@@ -11,6 +11,7 @@ namespace Chip8
         private Memory _vram;
         private Cpu _cpu;
         private Debugger? _debugger;
+        private Keypad _keypad;
 
         public Emulator(bool isDebuggerEnabled = false)
         {
@@ -20,7 +21,8 @@ namespace Chip8
             _ram = new Memory(4096);
             _vram = new Memory(64*32);
             _display = new Display(_vram.AsReadOnly());
-            _cpu = new Cpu(_ram, _vram);
+            _keypad = new Keypad();
+            _cpu = new Cpu(_ram, _vram, _keypad);
         }
 
         public void Initialize()
@@ -76,7 +78,7 @@ namespace Chip8
 
                 if (_debugger != null)
                 {
-                    _debugger.Update(_cpu.Dump(), _ram.Dump(InterpreterEndAddress, _ram.Size, 0x10), _vram.Dump());
+                    _debugger.Update(_cpu.Dump(), _ram.Dump(InterpreterEndAddress, _ram.Size, 0x10), _vram.Dump(), _keypad.ToString());
 
                     if (!_debugger.IsWindowOpen())
                         _display.Close();

@@ -16,5 +16,6 @@
     <Content Include="src\Chip8\Cpu.cs" />
     <Content Include="src\Program.cs" />
     <Content Include="src\Chip8\Debugger.cs" />
+    <Content Include="src\Chip8\Keypad.cs" />
   </ItemGroup>
 </Project>
