@@ -17,13 +17,15 @@ namespace Chip8
                                     // Basically if multiple functions are called this combined with the stack helps keep track of all their return points.
         private ushort[] _stack = new ushort[16]; // The stack stores the address the interpreter should return to when a subroutine is finished.
         private ushort _opcode; // Stores the current instruction
+        private Keypad _keypad;
         private Random _random = new Random();
         private Dictionary<byte, Action> _opHandlers = new Dictionary<byte, Action>(); // Basically a list of OpHanlder functions that can be retreived using the opID
 
-        public Cpu(Memory ram, Memory vram)
+        public Cpu(Memory ram, Memory vram, Keypad keypad)
         {
             _ram = ram;
             _vram = vram;
+            _keypad = keypad;
 
             _opHandlers.Add(0x0, OP_00E);
             _opHandlers.Add(0x1, OP_1nnn);
@@ -54,6 +56,7 @@ namespace Chip8
         {
             Fetch();
             DecodeAndExecute();
+            _keypad.Poll();
 
             if (_delayTimer > 0)
                 _delayTimer--;
