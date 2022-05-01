@@ -7,20 +7,13 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="OpenTK" Version="4.7.1" />
-    <PackageReference Include="Raylib-cs" Version="4.0.0.1" />
-    <Content Include="src\Program.cs" />
-    <Content Include="src\Memory.cs" />
-    <Content Include="src\Display.cs" />
-    <Content Include="src\Cpu.cs" />
-    <Content Include="src\Chip8.cs" />
+    <PackageReference Include="SFML.Net" Version="2.5.0" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta3.22114.1" />
     <Content Include="src\Chip8\Emulator.cs" />
-    <Content Include="src\Chip8\Chip8.cs" />
-    <Content Include="src\Chip8\Components\Cpu.cs" />
-    <Content Include="src\Chip8\Components\Display.cs" />
-    <Content Include="src\Chip8\Components\Memory.cs" />
     <Content Include="src\Chip8\Memory.cs" />
     <Content Include="src\Chip8\Display.cs" />
     <Content Include="src\Chip8\Cpu.cs" />
+    <Content Include="src\Program.cs" />
+    <Content Include="src\Chip8\Debugger.cs" />
   </ItemGroup>
 </Project>

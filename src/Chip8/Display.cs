@@ -1,94 +1,109 @@
-using Raylib_cs;
+using System.Collections.ObjectModel;
+using SFML.Graphics;
+using SFML.Window;
+using SFML.System;
 
 namespace Chip8
 {
     public class Display
     {
-        public int WindowScale
+        private const int BaseWidth = 64;
+        private const int BaseHeight = 32;
+        private const float AspectRatio =  BaseWidth / (float) BaseHeight;
+        private RenderWindow _window;
+        private ReadOnlyCollection<byte> _frameBuffer;
+
+        public Display(ReadOnlyCollection<byte> frameBuffer)
         {
-            set 
-            {
-                _scale = Math.Max(1, value);
-                _windowSize = (BaseX * _scale, BaseY * _scale);
-                _pixelSize = (_windowSize.X / BaseX, _windowSize.Y / BaseY);
-                Raylib.SetWindowSize(_windowSize.X, _windowSize.Y);
-            }
-            get => _scale;
+            _frameBuffer = frameBuffer;
+            _window = new RenderWindow(new VideoMode(BaseWidth * 15, BaseHeight * 15), "Chip8 - Display");
+            _window.Closed += OnWindowClose;
+            _window.Resized += OnWindowResized;
         }
-
-        public string WindowTitle
-        {
-            set
-            {
-                _title = value;
-                Raylib.SetWindowTitle(_title);
-            }
-            get => _title;
-        }
-
-        private const int BaseX = 64;
-        private const int BaseY = 32;
-
-        private bool[,] _display = new bool[BaseX, BaseY];
-        private int _scale = 15;
-        private string _title = "Chip8";
-        private (int X, int Y) _windowSize;
-        private (int X, int Y) _pixelSize;
-
-        public Display(int scale = 15, string title = "Chip8")
-        {
-            WindowScale = scale;
-            WindowTitle = title;
-
-            Raylib.InitWindow(_windowSize.X, _windowSize.Y, title);
-            _display[10, 10] = true;
-            _display[15, 10] = true;
-            _display[9, 14] = true;
-            _display[16, 14] = true;
-            for (int i = 0; i <= 5; i++)
-            {
-                _display[10 + i, 15] = true;
-            }
-        }
-
-        public void Update()
-        {
-            Raylib.BeginDrawing();
-            Raylib.ClearBackground(Color.BLACK);
-
-            for (int x = 0; x < BaseX; x++)
-            {
-                for (int y = 0; y < BaseY; y++)
-                {
-                    if (_display[x, y])
-                        Raylib.DrawRectangle(x * _pixelSize.X, y * _pixelSize.Y, _pixelSize.X, _pixelSize.Y, Color.WHITE);
-                }
-            }
-
-            Raylib.EndDrawing();
-        }
-
+        
         public void Clear()
         {
-            for (int x = 0; x < BaseX; x++)
-            {
-                for (int y = 0; y < BaseY; y++)
-                {
-                    _display[x, y] = false;
-                }
-            }
+            _window.Clear();
         }
 
         public void Close()
         {
-            if (Raylib.IsWindowReady())
-                Raylib.CloseWindow();
+            _window.Close();
         }
-    
 
-        public bool IsWindowClosed()
+        public bool IsWindowOpen()
         {
-            return Raylib.WindowShouldClose();
+            return _window.IsOpen;
+        }
+
+        public void Update()
+        {
+            _window.DispatchEvents();
+            _window.Clear();
+            
+            for (int i = 0, yPos = -1; i < _frameBuffer.Count; i++)
+            {
+                var xPos = i % BaseWidth;
+                if (i % BaseWidth == 0)
+                    yPos++;
+
+                if (_frameBuffer[i] != 0)
+                {
+                    var size = new Vector2f(_window.Size.X / BaseWidth, (_window.Size.X / BaseHeight));
+                    var pixel = new RectangleShape(){
+                        Size = size,
+                        Position = new Vector2f(xPos * size.X, yPos * size.Y),
+                        FillColor = Color.White
+                    };
+
+                    _window.Draw(pixel);
+                }
+            }
+
+            _window.Display();
+        }
+
+        public void SetWindowTitle(string title)
+        {
+            _window.SetTitle(title);
+        }
+
+        private void OnWindowClose(object? sender, EventArgs args)
+        {
+            _window.Close();
+        }
+
+        private void OnWindowResized(object? sender, EventArgs args)
+        {
+            var win = (SizeEventArgs) args;
+            var view = _window.DefaultView;
+            var windowRatio = win.Width / (float) win.Height;
+            var viewRatio = view.Size.X / (float) view.Size.Y;
+            var sizeX = 1f;
+            var sizeY = 1f;
+            var posX = 0f;
+            var posY = 0f;
+
+            if (windowRatio >= viewRatio) 
+            {
+                sizeX = viewRatio / windowRatio;
+                posX = (1 - sizeX) / 2f;
+            }
+            else 
+            {
+                sizeY = windowRatio / viewRatio;
+                posY = (1 - sizeY) / 2f;
+            }
+
+            view.Viewport = new FloatRect(posX, posY, sizeX, sizeY);
+            _window.SetView(view);
+
+        }
+
+        private Color GenRanColor()
+        {
+            var random = new Random();
+            return new Color((byte) random.Next(255), (byte) random.Next(255), (byte) random.Next(255));
         }
     }
 }
