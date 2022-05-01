@@ -36,8 +36,7 @@ namespace Chip8
         {
             if (!File.Exists(path))
             {
-                Console.WriteLine("ERROR: Failed to read file, path may be invalid");
-                return;
+                throw new Exception("ERROR: Failed to read file, path may be invalid");
             }
 
             if (Path.GetExtension(path) != ".ch8")

@@ -14,7 +14,7 @@ class Program
             Console.WriteLine("Starting emulator with no arguments. This is just for testing and should be disabled for release.");
             var chip8 = new Emulator(true);
             chip8.Initialize();
-            chip8.Load("D:/Code/C Sharp/COSC439_Chip8_Project/chip8-roms/games/Pong (1 player).ch8");
+            chip8.Load("D:/Code/C Sharp/COSC439_Chip8_Project/build/roms/games/Pong (1 player).ch8");
             chip8.Process();
             return;
         }
@@ -36,8 +36,15 @@ class Program
 
             var chip8 = new Emulator(isDebuggerEnabled);
             chip8.Initialize();
-            chip8.Load(filePath);
-            chip8.Process();
+            try 
+            {
+                chip8.Load(filePath);
+                chip8.Process();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         });
 
         rootCommand.Invoke(args);
