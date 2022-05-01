@@ -49,7 +49,7 @@ namespace Chip8
         {
             _soundTimer = 0;
             _delayTimer = 0;
-            _programCounter = 0x200; // 0x00 to 0x1FF are reserved so the program counter starts at 0x200
+            _programCounter = Emulator.InterpreterEndAddress; // 0x00 to 0x1FF are reserved so the program counter starts at 0x200
         }
 
         public void Cycle()
@@ -388,6 +388,35 @@ namespace Chip8
         private void OP_Dxyn()
         {
             // Dispaly needs a bit more configuration before this is tackled
+            var Vx = (byte) (_opcode & 0x0F00) >> 8;
+            var Vy = (byte) (_opcode & 0x00F0) >> 4;
+            var height = (byte) (_opcode & 0x000F);
+            
+            var xPos = _vRegisters[Vx] % 64;
+            var yPos = _vRegisters[Vy] % 32;
+
+            _vRegisters[0xF] = 0;
+
+            for (byte x = 0; x < height; x++)
+            {
+                var spriteByte = _ram[_iRegister + x];
+
+                for (byte y = 0; y < 8; y++)
+                {
+                    var spritePixel = (byte) spriteByte & (0x80 >> y);
+                    var screenPixel = _vram[(yPos + x) * 64 + (xPos + y)];
+
+                    if (spritePixel != 0)
+                    {
+                        if (screenPixel == 0xFF)
+                        {
+                            _vRegisters[0xF] = 1;
+                        }
+
+                        _vram[(yPos + x) * 64 + (xPos + y)] ^= 0xFF;
+                    }
+                }
+            }
         }
 
         private void OP_Ex()
@@ -408,12 +437,24 @@ namespace Chip8
 
         private void OP_Ex9E()
         {
-            // Keypad needs to be set up for this instruction to work
+            var Vx = (byte) (_opcode & 0xF00) >> 8;
+            var key = _vRegisters[Vx];
+
+            if (_keypad.IsPressed(key))
+            {
+                _programCounter += 2;
+            }
         }
 
         private void OP_ExA1()
         {
-            // Keypad needs to be set up for this instruction to work
+            var Vx = (byte) (_opcode & 0xF00) >> 8;
+            var key = _vRegisters[Vx];
+
+            if (!_keypad.IsPressed(key))
+            {
+                _programCounter += 2;
+            }
         }
 
         private void OP_Fx()
@@ -455,32 +496,50 @@ namespace Chip8
 
         private void OP_Fx07()
         {
-
+            var Vx = (byte) (_opcode & 0x0F00) >> 8;
+            _vRegisters[Vx] = _delayTimer;
         }
 
         private void OP_Fx0A()
         {
+            var Vx = (byte) (_opcode & 0x0F00);
 
+            for (byte i = 0; i < 0xF; i++)
+            {
+                if (_keypad.IsPressed(i))
+                {
+                    _vRegisters[Vx] = i;
+                    return;
+                }
+            }
+
+            _programCounter -= 2;
         }
 
         private void OP_Fx015()
         {
-
+            var Vx = (byte) (_opcode & 0x0F00) >> 8;
+            _delayTimer = _vRegisters[Vx];
         }
 
         private void OP_Fx018()
         {
-
+            var Vx = (byte) (_opcode & 0x0F00) >> 8;
+            _soundTimer = _vRegisters[Vx];
         }
 
         private void OP_Fx01E()
         {
-
+            var Vx = (byte) (_opcode & 0x0F00) >> 8;
+            _iRegister += _vRegisters[Vx];
         }
 
         private void OP_Fx029()
         {
+            var Vx = (byte) (_opcode & 0x0F00) >> 8;
+            var digit = _vRegisters[Vx];
 
+            _iRegister += (byte) (Emulator.FontStartAddress + (5 * digit));
         }
 
         private void OP_Fx033()
@@ -490,12 +549,22 @@ namespace Chip8
 
         private void OP_Fx055()
         {
+            var Vx = (byte) (_opcode & 0x0F00) >> 8;
 
+            for (byte i = 0; i < Vx; i++)
+            {
+                _ram[_iRegister + i] = _vRegisters[i];
+            }
         }
 
         private void OP_Fx065()
         {
+            var Vx = (byte) (_opcode & 0x0F00) >> 8;
 
+            for (byte i = 0; i < Vx; i++)
+            {
+                _vRegisters[i] = _ram[_iRegister + i];
+            }
         }
     }
 }
