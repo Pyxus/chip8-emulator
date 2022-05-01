@@ -452,41 +452,64 @@ namespace Chip8
 
         private void OP_Fx07()
         {
+            var Vx = (byte)((_opcode & 0x0F00) >> 8);
+           _vRegisters[Vx] = _delayTimer;
 
         }
 
         private void OP_Fx0A()
         {
+            //Keypad
 
         }
 
         private void OP_Fx015()
         {
+            var Vx = (byte)(_opcode & 0x0F00) >> 8);
+            _delayTimer = _vRegisters[Vx];
 
         }
 
         private void OP_Fx018()
         {
+            var Vx = (byte)((_opcode & 0x0F00) >> 8);
+            _soundTimer = _vRegisters[Vx];
 
         }
 
         private void OP_Fx01E()
         {
+            var Vx = (byte)((_opcode & 0x0F00)>> 8);
+            _iRegister += _vRegisters[Vx];
 
         }
 
         private void OP_Fx029()
         {
 
+
         }
 
         private void OP_Fx033()
         {
+            var Vx = (_opcode & 0x0F00) >>8;
+            var value = _vRegisters[Vx];
+            
+
+            _ram[_iRegister + 2] = (byte)(value % 10);
+            value /= 10;
+
+            _ram[_iRegister + 1] = (byte)(value % 10);
+            value /= 10;
+
+            _ram[_iRegister] = (byte)(value % 10);
+         
 
         }
 
         private void OP_Fx055()
         {
+            
 
         }
 
