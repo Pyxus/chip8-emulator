@@ -68,7 +68,7 @@ namespace Chip8
                 // 60Hz update
                 while (accumulator > RefreshRate)
                 {
-                    //_cpu.Cycle();
+                    _cpu.Cycle();
                     accumulator -= RefreshRate;
                 }
 

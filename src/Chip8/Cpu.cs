@@ -384,12 +384,23 @@ namespace Chip8
 
         private void OP_Dxyn()
         {
-            // Dispaly needs to be configured for this to work
+            // Dispaly needs a bit more configuration before this is tackled
         }
 
         private void OP_Ex()
         {
-
+            switch(_opcode & 0x00FF)
+            {
+                case 0x009E:
+                    OP_Ex9E();
+                    break;
+                case 0x00A1:
+                    OP_ExA1();
+                    break;
+                default:
+                    OP_NULL();
+                    break;
+            }
         }
 
         private void OP_Ex9E()
@@ -404,7 +415,39 @@ namespace Chip8
 
         private void OP_Fx()
         {
-
+            switch(_opcode & 0x00FF)
+            {
+                case 0x07:
+                    OP_Fx07();
+                    break;
+                case 0x0A:
+                    OP_Fx0A();
+                    break;
+                case 0x15:
+                    OP_Fx015();
+                    break;
+                case 0x18:
+                    OP_Fx018();
+                    break;
+                case 0x01E:
+                    OP_Fx01E();
+                    break;
+                case 0x29:
+                    OP_Fx029();
+                    break;
+                case 0x33:
+                    OP_Fx033();
+                    break;
+                case 0x55:
+                    OP_Fx055();
+                    break;
+                case 0x65:
+                    OP_Fx065();
+                    break;
+                default:
+                    OP_NULL();
+                    break;
+            }
         }
 
         private void OP_Fx07()

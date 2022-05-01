@@ -13,12 +13,14 @@ public class Debugger
 
     public Debugger()
     {
-        _window = new RenderWindow(new VideoMode(1280, 720), "Chip8 - Debugger");
-        _window.Closed += OnWindowClose;
-        _window.MouseWheelScrolled += OnWindowMouseWheelScrolled;       
         var sFile = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\src\Chip8\fonts\JetBrainsMono-Regular.ttf");
         var sFilePath = Path.GetFullPath(sFile);
         var font = new Font(sFilePath);
+
+        _window = new RenderWindow(new VideoMode(1280, 720), "Chip8 - Debugger");
+        _window.Closed += OnWindowClose;
+        _window.MouseWheelScrolled += OnWindowMouseWheelScrolled;       
+
         _registerText = new Text()
         {
             Font = font,
