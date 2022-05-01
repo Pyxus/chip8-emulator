@@ -512,7 +512,7 @@ namespace Chip8
                     return;
                 }
             }
-
+          
             _programCounter -= 2;
         }
 
@@ -544,6 +544,18 @@ namespace Chip8
 
         private void OP_Fx033()
         {
+            var Vx = (_opcode & 0x0F00) >>8;
+            var value = _vRegisters[Vx];
+            
+
+            _ram[_iRegister + 2] = (byte)(value % 10);
+            value /= 10;
+
+            _ram[_iRegister + 1] = (byte)(value % 10);
+            value /= 10;
+
+            _ram[_iRegister] = (byte)(value % 10);
+         
 
         }
 
