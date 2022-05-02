@@ -79,7 +79,7 @@ public class Debugger : Emulator
                 Font = font,
                 CharacterSize = 18,
                 FillColor = Color.Red,
-                Position = new Vector2f(1030, 250),
+                Position = new Vector2f(1034, 250),
                 Style = Text.Styles.Bold
 
             };

@@ -41,11 +41,13 @@ namespace Chip8
             LoadFonts();
             _isProgramLoaded = false;
 
+            /*
             var random = new Random();
             for(var i = 0; i < Vram.Size; i++)
             {
                 Vram[i] = (byte) random.Next(0xFF);
             }
+            */
         }
 
         public void Load(string path)

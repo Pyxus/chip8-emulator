@@ -105,7 +105,7 @@ namespace Chip8
         private void OP_NULL()
         {
             _instruction = "NULL";
-            throw new Exception($"Invalid Chip8 program provided. Unknown opcode '{_opcode.ToString("X")}' read at address 0x{(_programCounter--).ToString("X4")}");
+            throw new Exception($"Invalid Chip8 program provided. Unknown opcode '{_opcode.ToString("X4")}' read at address 0x{(_programCounter--).ToString("X4")}");
         }
 
         private void OP_00E()
