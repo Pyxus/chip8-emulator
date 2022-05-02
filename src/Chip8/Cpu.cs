@@ -68,20 +68,20 @@ namespace Chip8
         public string Dump()
         {
             var sb = new StringBuilder();
-            sb.AppendFormat("Op: {0:X4}\n\n", _opcode);
-            sb.AppendFormat("PC: {0:X2}\n", _programCounter);
-            sb.AppendFormat("I: {0:X2}\n", _iRegister);
+            sb.Append($"Op: {_opcode:X4}\n\n");
+            sb.Append($"PC: {_programCounter:X2}\n");
+            sb.Append($"I: {_iRegister:X2}\n");
 
             for (var i = 0; i < _vRegisters.Length; i++)
             {
-                sb.AppendFormat("V{0:X1}: {0:X2}\n", i, _vRegisters[i]);
+                sb.Append($"V{i:X1}: {_vRegisters[i]:X2}\n");
             }
 
             sb.AppendFormat("\nSP: {0:X2}\n", _stackPointer);
 
             for (var i = 0; i < _stack.Length; i++)
             {
-                sb.AppendFormat("Stack[{0:X1}]: {0:x2}\n", i, _stack[i]);
+                sb.AppendFormat($"Stack[{i:X1}]: {_stack[i]:x2}\n");
             }
 
             return sb.ToString();
