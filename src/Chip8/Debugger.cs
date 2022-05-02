@@ -71,7 +71,7 @@ public class Debugger : Emulator
                 Font = font,
                 CharacterSize = 12,
                 FillColor = Color.Cyan,
-                Position = new Vector2f(950, 0),
+                Position = new Vector2f(960, 0),
             };
 
             _crashText = new Text()
@@ -79,7 +79,7 @@ public class Debugger : Emulator
                 Font = font,
                 CharacterSize = 18,
                 FillColor = Color.Red,
-                Position = new Vector2f(1034, 250),
+                Position = new Vector2f(1044, 250),
                 Style = Text.Styles.Bold
 
             };
@@ -119,7 +119,7 @@ public class Debugger : Emulator
                         _canStepFoward = false;
                         _stepCount++;
                     }
-                    Update(Cpu.Dump(), Ram.Dump(InterpreterEndAddress, Ram.Size, 0x10), Vram.Dump(), Keypad.ToString());
+                    Update(Cpu.Dump(), Ram.Dump(0x10), Vram.Dump(), Keypad.ToString());
                 }
             }
             catch(Exception e)
@@ -130,7 +130,8 @@ public class Debugger : Emulator
                 while (_debugerApp.IsOpen)
                 {
                     _debugerApp.DispatchEvents();
-                    Update(Cpu.Dump(), Ram.Dump(InterpreterEndAddress, Ram.Size, 0x10), Vram.Dump(), Keypad.ToString());
+                    App.DispatchEvents();
+                    Update(Cpu.Dump(), Ram.Dump(0x10), Vram.Dump(), Keypad.ToString());
                 }
             }
         }
@@ -193,11 +194,23 @@ public class Debugger : Emulator
             ";
 
             _crashText.DisplayedString = _isProgramCrashed ? "PROGRAM CRASHED!!!" : "";
+
+            var memoryColumnUnderline = new RectangleShape(new Vector2f(328, 2))
+            {
+                Position = _memoryText.Position + new Vector2f(50, 35)
+            };
             
+            var vramColumnUnderline = new RectangleShape(new Vector2f(328, 2))
+            {
+                Position = _vramText.Position + new Vector2f(50, 35)
+            };
+
             _debugerApp.Draw(_registerText);
             _debugerApp.Draw(_keypadText);
             _debugerApp.Draw(_memoryText);
+            _debugerApp.Draw(memoryColumnUnderline);
             _debugerApp.Draw(_vramText);
+            _debugerApp.Draw(vramColumnUnderline);
             _debugerApp.Draw(_helpText);
             _debugerApp.Draw(_crashText);
             _debugerApp.Display();

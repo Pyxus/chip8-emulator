@@ -50,10 +50,10 @@ namespace Chip8
 
         public string Dump(int from, int to, int bytesPerRow = 0x10)
         {
-            var byteDigitCount = $"{Size:X}".Length;
+            var byteDigitCount = $"{Size-1:X}".Length;
             var hex = new StringBuilder();
 
-            for (var i = 0; i < byteDigitCount + 2; i++)
+            for (var i = 0; i < byteDigitCount + 4; i++)
             {
                 hex.Append(" ");
             }
@@ -74,7 +74,7 @@ namespace Chip8
                     
                     var hexFormat = "{" + $"{0}:X{byteDigitCount}" + "}";
                     
-                    hex.AppendFormat($"{hexFormat}  ", hexRowCount);
+                    hex.AppendFormat($"│{hexFormat}│  ", hexRowCount);
                     hexRowCount += bytesPerRow;
                 }
 

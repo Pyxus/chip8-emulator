@@ -8,7 +8,7 @@ namespace Chip8
     {
         public const long RefreshRate = (long) ((1 / 60.0) * TimeSpan.TicksPerSecond);
         public const ushort InterpreterEndAddress = 0x200;
-        public const byte FontStartAddress = 0x50;
+        public const byte FontStartAddress = 0x000;
         public const int BaseWidth = 64;
         public const int BaseHeight = 32;
         
@@ -137,26 +137,31 @@ namespace Chip8
             App.DispatchEvents();
             App.Clear();
             
-            for (int i = 0, yPos = -1; i < Vram.Size; i++)
+            for (var yLine = 0; yLine < Emulator.BaseHeight; yLine++)
             {
-                var xPos = i % BaseWidth;
-                if (i % BaseWidth == 0)
-                    yPos++;
-
-                if (Vram[i] != 0)
+                for (var xLine = 0; xLine < Emulator.BaseWidth; xLine++)
                 {
-                    var size = new Vector2f(App.Size.X / BaseWidth, (App.Size.X / BaseHeight));
-                    var pixel = new RectangleShape(){
-                        Size = size,
-                        Position = new Vector2f(xPos * size.X, yPos * size.Y),
-                        FillColor = Color.White
-                    };
+                    if (Vram[(yLine * Emulator.BaseWidth) + xLine] != 0)
+                    {
+                        var size = new Vector2f(App.Size.X / BaseWidth, (App.Size.Y / BaseHeight));
+                        var pixel = new RectangleShape(){
+                            Size = size,
+                            Position = new Vector2f(xLine * size.X, yLine * size.Y),
+                            FillColor = Color.White
+                        };
 
-                    App.Draw(pixel);
+                        App.Draw(pixel);
+                    }
                 }
             }
 
             App.Display();
+        }
+
+        private Color GenRanColor()
+        {
+            var random = new Random();
+            return new Color((byte) random.Next(255), (byte) random.Next(255), (byte) random.Next(255));
         }
 
         private void OnWindowKeyPressed(object? sender, KeyEventArgs args)

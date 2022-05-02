@@ -1,6 +1,5 @@
 using System.Text;
-using System.Reflection.Emit;
-using System.Collections.Generic;
+
 namespace Chip8
 {
     public class Cpu
@@ -67,8 +66,7 @@ namespace Chip8
         public string Dump()
         {
             var sb = new StringBuilder();
-            sb.Append($"OC: {_opcode:X4}\n");
-            sb.Append($"IN: {_instruction}\n\n");
+            sb.Append($"{_opcode:X4} - {_instruction}\n\n");
             sb.Append($"PC: {_programCounter:X2}\n");
             sb.Append($"I: {_iRegister:X2}\n");
 
@@ -367,38 +365,35 @@ namespace Chip8
 
         private void OP_Dxyn()
         {
-            // Dispaly needs a bit more configuration before this is tackled
             var x = (byte) (_opcode & 0x0F00) >> 8;
             var y = (byte) (_opcode & 0x00F0) >> 4;
-            var height = (byte) (_opcode & 0x000F);
-            
-            var xPos = _vRegisters[x] % 64;
-            var yPos = _vRegisters[y] % 32;
+            var n = (byte) (_opcode & 0x000F);
+            var xPos = _vRegisters[x] % Emulator.BaseWidth;
+            var yPos = _vRegisters[y] % Emulator.BaseHeight;
 
             _vRegisters[0xF] = 0;
 
-            for (byte row = 0; row < height; row++)
+            for (var row = 0; row < n; ++row)
             {
                 var spriteByte = _ram[_iRegister + row];
 
-                for (byte col = 0; col < 8; col++)
+                for (var col = 0; col < 8; ++col)
                 {
-                    var spritePixel = (byte) spriteByte & (0x80 >> col);
-                    var screenPixel = _vram[(yPos + row) * 64 + (xPos + col)];
+                    var spritePixel = spriteByte & (0x80u >> col);
+                    var vRamAddress = (yPos + row) * Emulator.BaseWidth + (xPos + col);
 
                     if (spritePixel != 0)
                     {
-                        if (screenPixel == 0xFF)
-                        {
+                        if (_vram[vRamAddress] == 0xFF)
                             _vRegisters[0xF] = 1;
-                        }
 
-                        _vram[(yPos + row) * 64 + (xPos + col)] ^= 0xFF;
+                        _vram[vRamAddress] ^= 0xFF;
                     }
                 }
             }
-
-            _instruction = $"DRW V{x:X1}, V{y:X1}, {height:X1}";
+            
+            //_programCounter += 2;
+            _instruction = $"DRW V{x:X1}, V{y:X1}, {n:X1}";
         }
 
         private void OP_Ex()
