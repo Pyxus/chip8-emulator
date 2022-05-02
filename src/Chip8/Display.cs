@@ -17,23 +17,13 @@ namespace Chip8
         {
             _frameBuffer = frameBuffer;
             _window = new RenderWindow(new VideoMode(BaseWidth * 15, BaseHeight * 15), "Chip8 - Display");
-            _window.Closed += OnWindowClose;
             _window.Resized += OnWindowResized;
         }
         
-        public void Clear()
-        {
-            _window.Clear();
-        }
 
-        public void Close()
+        public RenderWindow GetWindow()
         {
-            _window.Close();
-        }
-
-        public bool IsWindowOpen()
-        {
-            return _window.IsOpen;
+            return _window;
         }
 
         public void Update()
@@ -63,16 +53,6 @@ namespace Chip8
             _window.Display();
         }
 
-        public void SetWindowTitle(string title)
-        {
-            _window.SetTitle(title);
-        }
-
-        private void OnWindowClose(object? sender, EventArgs args)
-        {
-            _window.Close();
-        }
-
         private void OnWindowResized(object? sender, EventArgs args)
         {
             var win = (SizeEventArgs) args;
@@ -97,7 +77,6 @@ namespace Chip8
 
             view.Viewport = new FloatRect(posX, posY, sizeX, sizeY);
             _window.SetView(view);
-
         }
 
         private Color GenRanColor()

@@ -1,37 +1,44 @@
 namespace Chip8
 {
+    using SFML.Graphics;
+    using SFML.Window;
+    using SFML.System;
     public class Emulator
     {
-        const long RefreshRate = (long) ((1 / 60.0) * TimeSpan.TicksPerSecond);
-        public static ushort InterpreterEndAddress = 0x200;
-        public static byte FontStartAddress = 0x50;
+        public const long RefreshRate = (long) ((1 / 60.0) * TimeSpan.TicksPerSecond);
+        public const ushort InterpreterEndAddress = 0x200;
+        public const byte FontStartAddress = 0x50;
+        public const int BaseWidth = 64;
+        public const int BaseHeight = 32;
         
-        private Display _display;
-        private Memory _ram;
-        private Memory _vram;
-        private Cpu _cpu;
-        private Debugger? _debugger;
-        private Keypad _keypad;
+        protected RenderWindow App;
+        protected Memory Ram;
+        protected Memory Vram;
+        protected Cpu Cpu;
+        protected Keypad Keypad;
 
-        public Emulator(bool isDebuggerEnabled = false)
+        private bool _isProgramLoaded;
+
+        public Emulator()
         {
-            if (isDebuggerEnabled)
-                _debugger = new Debugger();
-
-            _ram = new Memory(4096);
-            _vram = new Memory(64*32);
-            _display = new Display(_vram.AsReadOnly());
-            _keypad = new Keypad();
-            _cpu = new Cpu(_ram, _vram, _keypad);
+            App = new RenderWindow(new VideoMode(BaseWidth * 15, BaseHeight * 15), "Chip8 - Display");
+            App.Resized += OnWindowResized;
+            App.KeyPressed += OnWindowKeyPressed;
+            App.Closed += OnWindowClosed;
+            Ram = new Memory(4096);
+            Vram = new Memory(BaseWidth * BaseHeight);
+            Keypad = new Keypad();
+            Cpu = new Cpu(Ram, Vram, Keypad);
         }
 
         public void Initialize()
         {
-            _vram.Clear();
-            _ram.Clear();
-            _cpu.Reset();
-            _display.Clear();
+            Vram.Clear();
+            Ram.Clear();
+            Cpu.Reset();
+            App.Clear();
             LoadFonts();
+            _isProgramLoaded = false;
         }
 
         public void Load(string path)
@@ -46,22 +53,31 @@ namespace Chip8
                 Console.WriteLine("WARNING: Chip8 files typically end with the exntesion '.ch8'. This file may not contain chip8 code.");
             }
 
+            Load(File.ReadAllBytes(path), Path.GetFileName(path));
+        }
+
+        public void Load(byte[] bytes, string programName = "Chip8 Program")
+        {
             var storeAddress = InterpreterEndAddress;
-            foreach(var b in File.ReadAllBytes(path))
+            foreach(var b in bytes)
             {
-                _ram.Write(storeAddress, b);
-                _ram[storeAddress] = b;
+                Ram.Write(storeAddress, b);
+                Ram[storeAddress] = b;
                 storeAddress++;
             }
             
-            _display.SetWindowTitle(Path.GetFileName(path));
+            App.SetTitle(programName);
+            _isProgramLoaded = true;
         }
 
-        public void Process()
+        public virtual void Process()
         {
+            if (!_isProgramLoaded)
+                throw new Exception("Terminating emulator. Program was never loaded into memory.");
+
             long prevTime = DateTime.Now.Ticks, delta = 0, accumulator = 0;
             
-            while (_display.IsWindowOpen())
+            while (App.IsOpen)
             {
                 delta = DateTime.Now.Ticks - prevTime;
                 prevTime = DateTime.Now.Ticks;
@@ -70,21 +86,14 @@ namespace Chip8
                 // 60Hz update
                 while (accumulator > RefreshRate)
                 {
-                    _cpu.Cycle();
+                    Cpu.Cycle();
                     accumulator -= RefreshRate;
                 }
 
-                _display.Update();
-
-                if (_debugger != null)
-                {
-                    _debugger.Update(_cpu.Dump(), _ram.Dump(InterpreterEndAddress, _ram.Size, 0x10), _vram.Dump(), _keypad.ToString());
-
-                    if (!_debugger.IsWindowOpen())
-                        _display.Close();
-                }
+                Render();
             }
         }
+    
 
         private void LoadFonts()
         {
@@ -110,8 +119,74 @@ namespace Chip8
 
             for(var i = FontStartAddress; i < _fontset.Length; i++)
             {
-                _ram[i] = _fontset[i];
+                Ram[i] = _fontset[i];
             }
+        }
+
+        protected void Render()
+        {
+            App.DispatchEvents();
+            App.Clear();
+            
+            for (int i = 0, yPos = -1; i < Vram.Size; i++)
+            {
+                var xPos = i % BaseWidth;
+                if (i % BaseWidth == 0)
+                    yPos++;
+
+                if (Vram[i] != 0)
+                {
+                    var size = new Vector2f(App.Size.X / BaseWidth, (App.Size.X / BaseHeight));
+                    var pixel = new RectangleShape(){
+                        Size = size,
+                        Position = new Vector2f(xPos * size.X, yPos * size.Y),
+                        FillColor = Color.White
+                    };
+
+                    App.Draw(pixel);
+                }
+            }
+
+            App.Display();
+        }
+
+        private void OnWindowKeyPressed(object? sender, KeyEventArgs args)
+        {
+            if (args.Code == Keyboard.Key.Escape)
+            {
+                App.Close();
+            }
+        }
+
+        private void OnWindowResized(object? sender, SizeEventArgs args)
+        {
+            var win = (SizeEventArgs) args;
+            var view = App.DefaultView;
+            var windowRatio = win.Width / (float) win.Height;
+            var viewRatio = view.Size.X / (float) view.Size.Y;
+            var sizeX = 1f;
+            var sizeY = 1f;
+            var posX = 0f;
+            var posY = 0f;
+
+            if (windowRatio >= viewRatio) 
+            {
+                sizeX = viewRatio / windowRatio;
+                posX = (1 - sizeX) / 2f;
+            }
+            else 
+            {
+                sizeY = windowRatio / viewRatio;
+                posY = (1 - sizeY) / 2f;
+            }
+
+            view.Viewport = new FloatRect(posX, posY, sizeX, sizeY);
+            App.SetView(view);
+        }
+
+        private void OnWindowClosed(object? sender, EventArgs args)
+        {
+            App.Close();
         }
     }
 }
