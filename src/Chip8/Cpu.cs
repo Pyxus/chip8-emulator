@@ -140,7 +140,7 @@ namespace Chip8
 
         private void OP_NULL()
         {
-            Console.WriteLine("Invalid Instruction read");
+            new Exception($"Invalid Chip8 program provided. Unkown Instruction '{_opcode.ToString("X")}' at address {(_programCounter--).ToString("X")}");
         }
 
         private void OP_00E()

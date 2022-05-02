@@ -2,156 +2,229 @@ using SFML.Graphics;
 using SFML.Window;
 using SFML.System;
 
-public class Debugger
+namespace Chip8
 {
-    private RenderWindow _window;
-    private Text _registerText;
-    private Text _memoryText;
-    private Text _vramText;
-    private Text _keypadText;
-    private Text _helpText;
-    private int _memoryLineSkip;
-    private int _vramLineSkip;
-
-    public Debugger()
+public class Debugger : Emulator
     {
-        var sFile = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\src\Chip8\fonts\JetBrainsMono-Regular.ttf");
-        var sFilePath = Path.GetFullPath(sFile);
-        var font = new Font(sFilePath);
+        private RenderWindow _debugerApp;
+        private Text _registerText;
+        private Text _memoryText;
+        private Text _vramText;
+        private Text _keypadText;
+        private Text _helpText;
+        private int _memoryLineSkip;
+        private int _vramLineSkip;
+        private bool _isPaused;
+        private bool _canStepFoward;
+        private int _stepCount;
 
-        _window = new RenderWindow(new VideoMode(1280, 720), "Chip8 - Debugger");
-        _window.Closed += OnWindowClose;
-        _window.MouseWheelScrolled += OnWindowMouseWheelScrolled;     
-        _window.KeyPressed += OnWindowKeyPressed;  
-
-        _registerText = new Text()
+        public Debugger(bool startPaused = false)
         {
-            Font = font,
-            CharacterSize = 12,
-            FillColor = Color.White,
-            Position = new Vector2f(0, 0),
-        };
+            var sFile = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\src\Chip8\fonts\JetBrainsMono-Regular.ttf");
+            var sFilePath = Path.GetFullPath(sFile);
+            var font = new Font(sFilePath);
 
-        _keypadText = new Text()
-        {
-            Font = font,
-            CharacterSize = 12,
-            FillColor = Color.White,
-            Position = new Vector2f(0, 625),
-        };
+            _isPaused = startPaused;
+            _debugerApp = new RenderWindow(new VideoMode(1280, 720), "Chip8 - Debugger");
+            _debugerApp.Closed += OnDebuggerWindowClose;
+            _debugerApp.MouseWheelScrolled += OnWindowMouseWheelScrolled;     
+            _debugerApp.KeyPressed += OnWindowKeyPressed;  
+            _debugerApp.KeyReleased += OnWindowKeyReleased;
+            _debugerApp.Resized += OnWindowResized;
 
-        _memoryText = new Text()
-        {
-            Font = font,
-            CharacterSize = 12,
-            FillColor = Color.White,
-            Position = new Vector2f(250, 0),
-        };
+            _registerText = new Text()
+            {
+                Font = font,
+                CharacterSize = 12,
+                FillColor = Color.White,
+                Position = new Vector2f(0, 0),
+            };
 
-        _vramText = new Text()
-        {
-            Font = font,
-            CharacterSize = 12,
-            FillColor = Color.White,
-            Position = new Vector2f(650, 0),
-        };
+            _keypadText = new Text()
+            {
+                Font = font,
+                CharacterSize = 12,
+                FillColor = Color.White,
+                Position = new Vector2f(0, 625),
+            };
 
-        _helpText = new Text()
-        {
-            Font = font,
-            CharacterSize = 12,
-            FillColor = Color.Cyan,
-            Position = new Vector2f(1050, 0),
-            DisplayedString = "[CONTROLS]\nMouse Scroll / Arrow Keys\n\tScroll through memory map\nHold LSHIFT\n\tIncreases scroll speed."
-        };
+            _memoryText = new Text()
+            {
+                Font = font,
+                CharacterSize = 12,
+                FillColor = Color.White,
+                Position = new Vector2f(250, 0),
+            };
 
-    }
+            _vramText = new Text()
+            {
+                Font = font,
+                CharacterSize = 12,
+                FillColor = Color.White,
+                Position = new Vector2f(650, 0),
+            };
 
-    public void Update(string registerText, string memoryText, string vramText, string keypadText)
-    {
-        _window.DispatchEvents();
-        _window.Clear();
-
-        var memoryLines = memoryText.Replace("\r", "").Split('\n');
-        var memoryColumns = memoryLines[..1];
-        var memoryRows = memoryLines[2..];
-        var memString = "[RAM]\n";
-        _memoryLineSkip = Math.Clamp(_memoryLineSkip, 0, memoryRows.Length);
-
-        for (var i = 0; i < memoryColumns.Length; i++)
-        {
-            memString += memoryColumns[i] + "\n\n";
+            _helpText = new Text()
+            {
+                Font = font,
+                CharacterSize = 12,
+                FillColor = Color.Cyan,
+                Position = new Vector2f(950, 0),
+            };
+            App.RequestFocus();
         }
 
-        for (var i = _memoryLineSkip; i < memoryRows.Length; i++)
+        public override void Process()
         {
-            memString += memoryRows[i] + "\n";
+            long prevTime = DateTime.Now.Ticks, delta = 0, accumulator = 0;
+            
+            while (App.IsOpen && _debugerApp.IsOpen)
+            {
+                _debugerApp.DispatchEvents();
+                App.DispatchEvents();
+
+                delta = DateTime.Now.Ticks - prevTime;
+                prevTime = DateTime.Now.Ticks;
+                if (!_isPaused)
+                {
+                    accumulator += delta;
+
+                    while (accumulator > RefreshRate)
+                    {
+                        Cpu.Cycle();
+                        accumulator -= RefreshRate;
+                    }
+
+                    Render();
+                    _stepCount++;
+                }
+                else if (_canStepFoward)
+                {
+                    Cpu.Cycle();
+                    Render();
+                    _canStepFoward = false;
+                    _stepCount++;
+                }
+                Update(Cpu.Dump(), Ram.Dump(InterpreterEndAddress, Ram.Size, 0x10), Vram.Dump(), Keypad.ToString());
+            }
         }
 
-        var vramLines = vramText.Replace("\r", "").Split('\n');
-        var vramColumns = vramLines[..1];
-        var vramRows = vramLines[2..];
-        var vramString = "[VRAM]\n";
-        _vramLineSkip = Math.Clamp(_vramLineSkip, 0, vramRows.Length);
-
-        for (var i = 0; i < vramColumns.Length; i++)
+        private void Update(string registerText, string memoryText, string vramText, string keypadText)
         {
-            vramString += vramColumns[i] + "\n\n";
+            _debugerApp.DispatchEvents();
+            _debugerApp.Clear();
+
+            var memoryLines = memoryText.Replace("\r", "").Split('\n');
+            var memoryColumns = memoryLines[..1];
+            var memoryRows = memoryLines[2..];
+            var memString = "[RAM]\n";
+            _memoryLineSkip = Math.Clamp(_memoryLineSkip, 0, memoryRows.Length);
+
+            for (var i = 0; i < memoryColumns.Length; i++)
+            {
+                memString += memoryColumns[i] + "\n\n";
+            }
+
+            for (var i = _memoryLineSkip; i < memoryRows.Length; i++)
+            {
+                memString += memoryRows[i] + "\n";
+            }
+
+            var vramLines = vramText.Replace("\r", "").Split('\n');
+            var vramColumns = vramLines[..1];
+            var vramRows = vramLines[2..];
+            var vramString = "[VRAM]\n";
+            _vramLineSkip = Math.Clamp(_vramLineSkip, 0, vramRows.Length);
+
+            for (var i = 0; i < vramColumns.Length; i++)
+            {
+                vramString += vramColumns[i] + "\n\n";
+            }
+
+            for (var i = _memoryLineSkip; i < vramRows.Length; i++)
+            {
+                vramString += vramRows[i] + "\n";
+            }
+
+            _registerText.DisplayedString = registerText;
+            _keypadText.DisplayedString = "[Keypad]\n" + keypadText;
+            _memoryText.DisplayedString = memString;
+            _vramText.DisplayedString = vramString;
+            _helpText.DisplayedString = $@"
+            [CONTROLS]
+            Mouse Scroll / UpDown Arrows:
+                Scroll through memory map
+            Hold LSHIFT
+                Increases scroll speed.
+            Spacebar:
+                Pause emulator
+            Right Arrow:
+                Step foward when paused
+            
+            [STATUS]
+            Is Paused: {_isPaused}
+            Steps: {_stepCount}
+            ";
+            
+            _debugerApp.Draw(_registerText);
+            _debugerApp.Draw(_keypadText);
+            _debugerApp.Draw(_memoryText);
+            _debugerApp.Draw(_vramText);
+            _debugerApp.Draw(_helpText);
+            _debugerApp.Display();
         }
 
-        for (var i = _memoryLineSkip; i < vramRows.Length; i++)
+        private void OnDebuggerWindowClose(object? sender, EventArgs args)
         {
-            vramString += vramRows[i] + "\n";
+            _debugerApp.Close();
+            App.Close();
         }
 
-        _registerText.DisplayedString = registerText;
-        _keypadText.DisplayedString = "[Keypad]\n" + keypadText;
-        _memoryText.DisplayedString = memString;
-        _vramText.DisplayedString = vramString;
-        
-        _window.Draw(_registerText);
-        _window.Draw(_keypadText);
-        _window.Draw(_memoryText);
-        _window.Draw(_vramText);
-        _window.Draw(_helpText);
-        _window.Display();
-    }
-
-    public bool IsWindowOpen()
-    {
-        return _window.IsOpen;
-    }
-
-    private void OnWindowClose(object? sender, EventArgs args)
-    {
-        _window.Close();
-    }
-
-    private void OnWindowMouseWheelScrolled(object? sender, MouseWheelScrollEventArgs args)
-    {
-        if (args.Delta >= 1)
+        private void OnWindowMouseWheelScrolled(object? sender, MouseWheelScrollEventArgs args)
         {
-            _memoryLineSkip -= Keyboard.IsKeyPressed(Keyboard.Key.LShift) ? 4 : 1;
-            _vramLineSkip -= Keyboard.IsKeyPressed(Keyboard.Key.LShift) ? 4 : 1;
+            if (args.Delta >= 1)
+            {
+                _memoryLineSkip -= Keyboard.IsKeyPressed(Keyboard.Key.LShift) ? 4 : 1;
+                _vramLineSkip -= Keyboard.IsKeyPressed(Keyboard.Key.LShift) ? 4 : 1;
+            }
+            else if (args.Delta <= -1)
+            {
+                _memoryLineSkip += Keyboard.IsKeyPressed(Keyboard.Key.LShift) ? 4 : 1;
+                _vramLineSkip += Keyboard.IsKeyPressed(Keyboard.Key.LShift) ? 4 : 1;
+            }
         }
-        else if (args.Delta <= -1)
-        {
-            _memoryLineSkip += Keyboard.IsKeyPressed(Keyboard.Key.LShift) ? 4 : 1;
-            _vramLineSkip += Keyboard.IsKeyPressed(Keyboard.Key.LShift) ? 4 : 1;
-        }
-    }
 
-    private void OnWindowKeyPressed(object? sender, KeyEventArgs args)
-    {
-        if (args.Code == Keyboard.Key.Up)
+        private void OnWindowKeyPressed(object? sender, KeyEventArgs args)
         {
-            _memoryLineSkip -= args.Shift ? 4 : 1;
-            _vramLineSkip -= args.Shift ? 4 : 1;
+            if (args.Code == Keyboard.Key.Up)
+            {
+                _memoryLineSkip -= args.Shift ? 4 : 1;
+                _vramLineSkip -= args.Shift ? 4 : 1;
+            }
+            else if (args.Code == Keyboard.Key.Down)
+            {
+                _memoryLineSkip += args.Shift ? 4 : 1;
+                _vramLineSkip += args.Shift ? 4 : 1;
+            } 
         }
-        else if (args.Code == Keyboard.Key.Down)
+
+        private void OnWindowKeyReleased(object? sender, KeyEventArgs args)
         {
-            _memoryLineSkip += args.Shift ? 4 : 1;
-            _vramLineSkip += args.Shift ? 4 : 1;
-        } 
+            if (args.Code == Keyboard.Key.Space)
+            {
+                _isPaused = !_isPaused;
+            }
+
+            if (args.Code == Keyboard.Key.Right)
+            {
+                _canStepFoward = true;
+            }
+        }
+
+        private void OnWindowResized(object? sender, SizeEventArgs args)
+        {
+            var rect = new FloatRect(0, 0, args.Width, args.Height);
+            _debugerApp.SetView(new View(rect));
+        }
     }
 }
