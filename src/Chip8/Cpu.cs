@@ -42,7 +42,6 @@ namespace Chip8
             _opHandlers.Add(0xD, OP_Dxyn);
             _opHandlers.Add(0xE, OP_Ex);
             _opHandlers.Add(0xF, OP_Fx);
-            _stack[0] = 0x0F;
         }
 
         public void Reset()
