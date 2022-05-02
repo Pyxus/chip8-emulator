@@ -9,8 +9,8 @@ class Program
         if (args.Length == 0)
         {
             Console.WriteLine("Starting emulator with no arguments. This is just for testing and should be disabled for release.");
-            RunChip8(@"D:\Code\C Sharp\COSC439_Chip8_Project\build\roms\games\Brick (Brix hack, 1990).ch8", true, true);
-            //RunChip8Bytes(new byte[]{0xAB, 0xCD})
+            //RunChip8(@"D:\Code\C Sharp\COSC439_Chip8_Project\build\roms\games\Brick (Brix hack, 1990).ch8", true, true);
+            RunChip8Bytes(new byte[]{0x00, 0xE0});
             return;
         }
         #endregion

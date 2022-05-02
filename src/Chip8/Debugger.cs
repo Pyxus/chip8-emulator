@@ -12,10 +12,12 @@ public class Debugger : Emulator
         private Text _vramText;
         private Text _keypadText;
         private Text _helpText;
+        private Text _crashText;
         private int _memoryLineSkip;
         private int _vramLineSkip;
         private bool _isPaused;
         private bool _canStepFoward;
+        private bool _isProgramCrashed;
         private int _stepCount;
 
         public Debugger(bool startPaused = false)
@@ -71,6 +73,16 @@ public class Debugger : Emulator
                 FillColor = Color.Cyan,
                 Position = new Vector2f(950, 0),
             };
+
+            _crashText = new Text()
+            {
+                Font = font,
+                CharacterSize = 18,
+                FillColor = Color.Red,
+                Position = new Vector2f(1030, 250),
+                Style = Text.Styles.Bold
+
+            };
             App.RequestFocus();
         }
 
@@ -78,34 +90,48 @@ public class Debugger : Emulator
         {
             long prevTime = DateTime.Now.Ticks, delta = 0, accumulator = 0;
             
-            while (App.IsOpen && _debugerApp.IsOpen)
+            try
             {
-                _debugerApp.DispatchEvents();
-                App.DispatchEvents();
-
-                delta = DateTime.Now.Ticks - prevTime;
-                prevTime = DateTime.Now.Ticks;
-                if (!_isPaused)
+                while (App.IsOpen && _debugerApp.IsOpen)
                 {
-                    accumulator += delta;
+                    _debugerApp.DispatchEvents();
+                    App.DispatchEvents();
 
-                    while (accumulator > RefreshRate)
+                    delta = DateTime.Now.Ticks - prevTime;
+                    prevTime = DateTime.Now.Ticks;
+                    if (!_isPaused)
+                    {
+                        accumulator += delta;
+
+                        while (accumulator > RefreshRate)
+                        {
+                            Cpu.Cycle();
+                            accumulator -= RefreshRate;
+                        }
+
+                        Render();
+                        _stepCount++;
+                    }
+                    else if (_canStepFoward)
                     {
                         Cpu.Cycle();
-                        accumulator -= RefreshRate;
+                        Render();
+                        _canStepFoward = false;
+                        _stepCount++;
                     }
-
-                    Render();
-                    _stepCount++;
+                    Update(Cpu.Dump(), Ram.Dump(InterpreterEndAddress, Ram.Size, 0x10), Vram.Dump(), Keypad.ToString());
                 }
-                else if (_canStepFoward)
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                _isProgramCrashed = true;
+                
+                while (_debugerApp.IsOpen)
                 {
-                    Cpu.Cycle();
-                    Render();
-                    _canStepFoward = false;
-                    _stepCount++;
+                    _debugerApp.DispatchEvents();
+                    Update(Cpu.Dump(), Ram.Dump(InterpreterEndAddress, Ram.Size, 0x10), Vram.Dump(), Keypad.ToString());
                 }
-                Update(Cpu.Dump(), Ram.Dump(InterpreterEndAddress, Ram.Size, 0x10), Vram.Dump(), Keypad.ToString());
             }
         }
 
@@ -161,16 +187,19 @@ public class Debugger : Emulator
             Right Arrow:
                 Step foward when paused
             
-            [STATUS]
+            [STATE]
             Is Paused: {_isPaused}
             Steps: {_stepCount}
             ";
+
+            _crashText.DisplayedString = _isProgramCrashed ? "PROGRAM CRASHED!!!" : "";
             
             _debugerApp.Draw(_registerText);
             _debugerApp.Draw(_keypadText);
             _debugerApp.Draw(_memoryText);
             _debugerApp.Draw(_vramText);
             _debugerApp.Draw(_helpText);
+            _debugerApp.Draw(_crashText);
             _debugerApp.Display();
         }
 

@@ -3,6 +3,7 @@ namespace Chip8
     using SFML.Graphics;
     using SFML.Window;
     using SFML.System;
+
     public class Emulator
     {
         public const long RefreshRate = (long) ((1 / 60.0) * TimeSpan.TicksPerSecond);
@@ -39,6 +40,12 @@ namespace Chip8
             App.Clear();
             LoadFonts();
             _isProgramLoaded = false;
+
+            var random = new Random();
+            for(var i = 0; i < Vram.Size; i++)
+            {
+                Vram[i] = (byte) random.Next(0xFF);
+            }
         }
 
         public void Load(string path)
