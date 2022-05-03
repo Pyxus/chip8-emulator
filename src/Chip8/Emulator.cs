@@ -137,16 +137,16 @@ namespace Chip8
             App.DispatchEvents();
             App.Clear();
             
-            for (var yLine = 0; yLine < Emulator.BaseHeight; yLine++)
+            for (var yDraw = 0; yDraw < Emulator.BaseHeight; yDraw++)
             {
-                for (var xLine = 0; xLine < Emulator.BaseWidth; xLine++)
+                for (var xDraw = 0; xDraw < Emulator.BaseWidth; xDraw++)
                 {
-                    if (Vram[(yLine * Emulator.BaseWidth) + xLine] != 0)
+                    if (Vram[(yDraw * Emulator.BaseWidth) + xDraw] != 0)
                     {
                         var size = new Vector2f(App.Size.X / BaseWidth, (App.Size.Y / BaseHeight));
                         var pixel = new RectangleShape(){
                             Size = size,
-                            Position = new Vector2f(xLine * size.X, yLine * size.Y),
+                            Position = new Vector2f(xDraw * size.X, yDraw * size.Y),
                             FillColor = Color.White
                         };
 

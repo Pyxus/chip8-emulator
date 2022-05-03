@@ -373,14 +373,14 @@ namespace Chip8
 
             _vRegisters[0xF] = 0;
 
-            for (var row = 0; row < n; ++row)
+            for (var xDraw = 0; xDraw < n; ++xDraw)
             {
-                var spriteByte = _ram[_iRegister + row];
+                var spriteByte = _ram[_iRegister + xDraw];
 
-                for (var col = 0; col < 8; ++col)
+                for (var yDraw = 0; yDraw < 8; ++yDraw)
                 {
-                    var spritePixel = spriteByte & (0x80u >> col);
-                    var vRamAddress = (yPos + row) * Emulator.BaseWidth + (xPos + col);
+                    var spritePixel = spriteByte & (0x80 >> yDraw);
+                    var vRamAddress = (yPos + xDraw) * Emulator.BaseWidth + (xPos + yDraw);
 
                     if (spritePixel != 0)
                     {
