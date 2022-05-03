@@ -9,8 +9,8 @@ class Program
         if (args.Length == 0)
         {
             Console.WriteLine("Starting emulator with no arguments. This is just for testing and should be disabled for release.");
-            RunChip8(@"D:\Code\C Sharp\COSC439_Chip8_Project\build\roms\programs\Clock Program [Bill Fisher, 1981].ch8", true, true);
-            //RunChip8Bytes(new byte[]{0x00, 0x00});
+            //RunChip8(@"C:\Users\trwill\OneDrive\Documents\GitHub\COSC439_Chip8_Project\build\roms\games\Space Invaders [David Winter] (alt).ch8", true, true);
+            RunChip8Bytes(new byte[]{ 0x41,0x11});
             return;
         }
         #endregion
