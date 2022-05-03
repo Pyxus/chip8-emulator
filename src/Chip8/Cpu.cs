@@ -158,7 +158,7 @@ namespace Chip8
             {
                 _programCounter += 2;
             }
-            _instruction = $"SE V{x:X1}, {kk}";
+            _instruction = $"SE V{x:X1}, {kk:X3}";
         }
 
         private void OP_4xkk()
@@ -170,7 +170,7 @@ namespace Chip8
             {
                 _programCounter += 2;
             }
-            _instruction = $"SNE V{x:X1}, {kk}";
+            _instruction = $"SNE V{x:X1}, {kk:X3}";
         }
 
         private void OP_5xy0()
