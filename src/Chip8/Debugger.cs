@@ -47,7 +47,7 @@ public class Debugger : Emulator
                 Font = font,
                 CharacterSize = 12,
                 FillColor = Color.White,
-                Position = new Vector2f(0, 625),
+                Position = new Vector2f(1044, 630),
             };
 
             _memoryText = new Text()

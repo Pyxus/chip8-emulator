@@ -69,6 +69,8 @@ namespace Chip8
             sb.Append($"{_opcode:X4} - {_instruction}\n\n");
             sb.Append($"PC: {_programCounter:X2}\n");
             sb.Append($"I: {_iRegister:X2}\n");
+            sb.Append($"DT: {_delayTimer}\n");
+            sb.Append($"ST: {_soundTimer}\n");
 
             for (var i = 0; i < _vRegisters.Length; i++)
             {
