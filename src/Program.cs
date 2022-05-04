@@ -10,7 +10,7 @@ class Program
         {
             Console.WriteLine("Starting emulator with no arguments. This is just for testing and should be disabled for release.");
             //RunChip8(@"C:\Users\trwill\OneDrive\Documents\GitHub\COSC439_Chip8_Project\build\roms\games\Space Invaders [David Winter] (alt).ch8", true, true);
-            RunChip8Bytes(new byte[]{ 0x41,0x11});
+            RunChip8Bytes(new byte[]{ 0x60, 0x43, 0x62, 0x21 ,0xF1,0x0A});
             return;
         }
         #endregion
