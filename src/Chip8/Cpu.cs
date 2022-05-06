@@ -153,8 +153,8 @@ namespace Chip8
 
         private void OP_3xkk()
         {
-            var x = (byte)((_opcode & 0x0F00) >> 8);
-            var kk = (byte)(_opcode & 0x00FF);
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
+            var kk = (byte) (_opcode & 0x00FF);
 
             if (_vRegisters[x] == kk)
             {
@@ -165,8 +165,8 @@ namespace Chip8
 
         private void OP_4xkk()
         {
-            var x = (byte)((_opcode & 0x0F00) >> 8);
-            var kk = (byte)(_opcode & 0x00FF);
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
+            var kk = (byte) (_opcode & 0x00FF);
 
             if (_vRegisters[x] != kk)
             {
@@ -177,8 +177,8 @@ namespace Chip8
 
         private void OP_5xy0()
         {
-            var x = (byte)((_opcode & 0x0F00) >> 8);
-            var y = (byte)((_opcode & 0x00F0) >> 4);
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
+            var y = (byte) ((_opcode & 0x00F0) >> 4);
 
             if (_vRegisters[x] == _vRegisters[y])
             {
@@ -189,8 +189,8 @@ namespace Chip8
 
         private void OP_6xkk()
         {
-            var x = (byte)((_opcode & 0x0F00) >> 8);
-            var kk = (byte)(_opcode & 0x00FF);
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
+            var kk = (byte) (_opcode & 0x00FF);
 
             _vRegisters[x] = kk;
             _instruction = $"LD V{x:X1}, {kk:X2}";
@@ -198,8 +198,8 @@ namespace Chip8
 
         private void OP_7xkk()
         {
-            var x = (byte)((_opcode & 0x0F00) >> 8);
-            var kk = (byte)(_opcode & 0x00FF);
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
+            var kk = (byte) (_opcode & 0x00FF);
 
             _vRegisters[x] += kk;
             _instruction = $"ADD V{x:X1}, {kk:X2}";
@@ -240,14 +240,12 @@ namespace Chip8
                     OP_NULL();
                     break;
             }
-
-
         }
 
         private void OP_8xy0()
         {
-            var x = (byte)((_opcode & 0x0F00) >> 8);
-            var y = (byte)((_opcode & 0x00F0) >> 4);
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
+            var y = (byte) ((_opcode & 0x00F0) >> 4);
 
             _vRegisters[x] = _vRegisters[y];
             _instruction = $"LD V{x:X1}, V{y:X1}";
@@ -255,8 +253,8 @@ namespace Chip8
 
         private void OP_8xy1()
         {
-            var x = (byte)((_opcode & 0x0F00) >> 8);
-            var y = (byte)((_opcode & 0x00F0) >> 4);
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
+            var y = (byte) ((_opcode & 0x00F0) >> 4);
 
             _vRegisters[x] |= _vRegisters[y];
             _instruction = $"OR V{x:X1}, V{y:X1}";
@@ -264,8 +262,8 @@ namespace Chip8
 
         private void OP_8xy2()
         {
-            var x = (byte)((_opcode & 0x0F00) >> 8);
-            var y = (byte)((_opcode & 0x00F0) >> 4);
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
+            var y = (byte) ((_opcode & 0x00F0) >> 4);
 
             _vRegisters[x] &= _vRegisters[y];
             _instruction = $"AND V{x:X1}, V{y:X1}";
@@ -273,8 +271,8 @@ namespace Chip8
 
         private void OP_8xy3()
         {
-            var x = (byte)((_opcode & 0x0F00) >> 8);
-            var y = (byte)((_opcode & 0x00F0) >> 4);
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
+            var y = (byte) ((_opcode & 0x00F0) >> 4);
 
             _vRegisters[x] ^= _vRegisters[y];
             _instruction = $"XOR V{x:X1}, V{y:X1}";
@@ -282,8 +280,8 @@ namespace Chip8
         }
         private void OP_8xy4()
         {
-            var x = (byte)((_opcode & 0x0F00) >> 8);
-            var y = (byte)((_opcode & 0x00F0) >> 4);
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
+            var y = (byte) ((_opcode & 0x00F0) >> 4);
             var sum = _vRegisters[x] + _vRegisters[y];
 
             _vRegisters[0xF] = (byte)(sum > 0xFF ? 1 : 0);
@@ -293,8 +291,8 @@ namespace Chip8
 
         private void OP_8xy5()
         {
-            var x = (byte)((_opcode & 0x0F00) >> 8);
-            var y = (byte)((_opcode & 0x00F0) >> 4);
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
+            var y = (byte) ((_opcode & 0x00F0) >> 4);
 
             _vRegisters[0xF] = (byte)(_vRegisters[x] > _vRegisters[y] ? 1 : 0);
             _vRegisters[x] -= _vRegisters[y];
@@ -303,8 +301,8 @@ namespace Chip8
 
         private void OP_8xy6()
         {
-            var x = (byte)((_opcode & 0x0F00) >> 8);
-            var y = (byte)((_opcode & 0x00F0) >> 4);
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
+            var y = (byte) ((_opcode & 0x00F0) >> 4);
 
             _vRegisters[0xF] = (byte)(_vRegisters[x] & 0x1); // TODO: Comprehend this operation
             _vRegisters[x] >>= 1;
@@ -314,8 +312,8 @@ namespace Chip8
 
         private void OP_8xy7()
         {
-            var x = (byte)((_opcode & 0x0F00) >> 8);
-            var y = (byte)((_opcode & 0x00F0) >> 4);
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
+            var y = (byte) ((_opcode & 0x00F0) >> 4);
 
             _vRegisters[0xF] = (byte)(_vRegisters[y] > _vRegisters[x] ? 1 : 0);
             _vRegisters[x] = (byte)(_vRegisters[y] - _vRegisters[x]);
@@ -324,8 +322,8 @@ namespace Chip8
 
         private void OP_8xyE()
         {
-            var x = (byte)((_opcode & 0x0F00) >> 8);
-            var y = (byte)((_opcode & 0x00F0) >> 4);
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
+            var y = (byte) ((_opcode & 0x00F0) >> 4);
 
             _vRegisters[0xF] = (byte)((_vRegisters[x] & 0x80) >> 7); // TODO: Comprehend this operation
             _vRegisters[x] <<= 1;
@@ -334,8 +332,8 @@ namespace Chip8
 
         private void OP_9xy0()
         {
-            var x = (byte)((_opcode & 0x0F00) >> 8);
-            var y = (byte)((_opcode & 0x00F0) >> 4);
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
+            var y = (byte) ((_opcode & 0x00F0) >> 4);
 
             if (_vRegisters[x] != _vRegisters[y])
             {
@@ -346,7 +344,7 @@ namespace Chip8
 
         private void OP_Annn()
         {
-            _iRegister = (ushort)(_opcode & 0x0FFF);
+            _iRegister = (ushort) (_opcode & 0x0FFF);
             _instruction = $"LD I, {_iRegister:X4}";
         }
 
@@ -359,8 +357,8 @@ namespace Chip8
 
         private void OP_Cxkk()
         {
-            var x = (byte)((_opcode & 0x0F00) >> 8);
-            var kk = (byte)(_opcode & 0x00FF);
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
+            var kk = (byte) (_opcode & 0x00FF);
 
             _vRegisters[x] = (byte)(_random.Next(Byte.MaxValue) & kk);
             _instruction = $"RND V{x:X1}, {kk:X2}";
@@ -368,9 +366,9 @@ namespace Chip8
 
         private void OP_Dxyn()
         {
-            var x = (byte)(_opcode & 0x0F00) >> 8;
-            var y = (byte)(_opcode & 0x00F0) >> 4;
-            var n = (byte)(_opcode & 0x000F);
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
+            var y = (byte) ((_opcode & 0x00F0) >> 4);
+            var n = (byte) (_opcode & 0x000F);
             var xPos = _vRegisters[x] % Emulator.BaseWidth;
             var yPos = _vRegisters[y] % Emulator.BaseHeight;
 
@@ -417,7 +415,7 @@ namespace Chip8
 
         private void OP_Ex9E()
         {
-            var x = (byte)(_opcode & 0xF00) >> 8;
+            var x = (byte) ((_opcode & 0xF00) >> 8);
             var key = _vRegisters[x];
 
             if (_keypad.IsPressed(key))
@@ -430,7 +428,7 @@ namespace Chip8
 
         private void OP_ExA1()
         {
-            var x = (byte)(_opcode & 0xF00) >> 8;
+            var x = (byte) ((_opcode & 0xF00) >> 8);
             var key = _vRegisters[x];
 
             if (!_keypad.IsPressed(key))
@@ -452,25 +450,25 @@ namespace Chip8
                     OP_Fx0A();
                     break;
                 case 0x15:
-                    OP_Fx015();
+                    OP_Fx15();
                     break;
                 case 0x18:
-                    OP_Fx018();
+                    OP_Fx18();
                     break;
                 case 0x01E:
-                    OP_Fx01E();
+                    OP_Fx1E();
                     break;
                 case 0x29:
-                    OP_Fx029();
+                    OP_Fx29();
                     break;
                 case 0x33:
-                    OP_Fx033();
+                    OP_Fx33();
                     break;
                 case 0x55:
-                    OP_Fx055();
+                    OP_Fx55();
                     break;
                 case 0x65:
-                    OP_Fx065();
+                    OP_Fx65();
                     break;
                 default:
                     OP_NULL();
@@ -480,14 +478,14 @@ namespace Chip8
 
         private void OP_Fx07()
         {
-            var x = (byte)(_opcode & 0x0F00) >> 8;
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
             _vRegisters[x] = _delayTimer;
             _instruction = $"LD V{x:X1}, DT";
         }
 
         private void OP_Fx0A()
         {
-            var x = (byte)(_opcode & 0x0F00);
+            var x = (byte) (_opcode & 0x0F00);
 
             for (byte i = 0; i < 0xF; i++)
             {
@@ -502,39 +500,39 @@ namespace Chip8
             _instruction = $"LD V{x:X1}, K";
         }
 
-        private void OP_Fx015()
+        private void OP_Fx15()
         {
-            var x = (byte)(_opcode & 0x0F00) >> 8;
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
             _delayTimer = _vRegisters[x];
             _instruction = $"LD DT, V{x:X1}";
         }
 
-        private void OP_Fx018()
+        private void OP_Fx18()
         {
-            var x = (byte)(_opcode & 0x0F00) >> 8;
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
             _soundTimer = _vRegisters[x];
             _instruction = $"LD ST, V{x:X1}";
         }
 
-        private void OP_Fx01E()
+        private void OP_Fx1E()
         {
-            var x = (byte)(_opcode & 0x0F00) >> 8;
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
             _iRegister += _vRegisters[x];
             _instruction = $"ADD I, V{x:X1}";
         }
 
-        private void OP_Fx029()
+        private void OP_Fx29()
         {
-            var x = (byte)(_opcode & 0x0F00) >> 8;
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
             var digit = _vRegisters[x];
 
-            _iRegister += (byte)(Emulator.FontStartAddress + (5 * digit));
+            _iRegister += (byte) (Emulator.FontStartAddress + (5 * digit));
             _instruction = $"LD F, V{x:X1}";
         }
 
-        private void OP_Fx033()
+        private void OP_Fx33()
         {
-            var x = (_opcode & 0x0F00) >> 8;
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
             var value = _vRegisters[x];
 
 
@@ -549,27 +547,25 @@ namespace Chip8
             _instruction = $"LD B, V{x:X1}";
         }
 
-        private void OP_Fx055()
+        private void OP_Fx55()
         {
-            var x = (byte)((_opcode & 0x0F00) >> 8);
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
 
             for (byte i = 0; i <= x; i++)
             {
                 _ram[_iRegister + i] = _vRegisters[i];
-
             }
 
             _instruction = $"LD [I], V{x:X1}";
         }
 
-        private void OP_Fx065()
+        private void OP_Fx65()
         {
-            var x = (byte)((_opcode & 0x0F00) >> 8);
+            var x = (byte) ((_opcode & 0x0F00) >> 8);
 
             for (byte i = 0; i <= x; i++)
             {
-                _ram[_iRegister + i] = _vRegisters[i];
-
+                _vRegisters[i] = _ram[_iRegister + i];
             }
 
             _instruction = $"LD V{x:X1}, [I]";
