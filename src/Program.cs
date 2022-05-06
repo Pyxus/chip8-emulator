@@ -9,7 +9,7 @@ class Program
         if (args.Length == 0)
         {
             Console.WriteLine("Starting emulator with no arguments. This is just for testing and should be disabled for release.");
-            RunChip8(@"D:\Code\C Sharp\COSC439_Chip8_Project\build\roms\games\Pong (1 player).ch8", true, true);
+            RunChip8(@"D:\Code\C Sharp\COSC439_Chip8_Project\build\roms\programs\Minimal game [Revival Studios, 2007].ch8", true, true);
             //RunChip8Bytes(new byte[]{0xD0, 0x05});
             return;
         }

@@ -1,3 +1,4 @@
+using System.Drawing;
 using System.Text;
 
 namespace Chip8
@@ -131,13 +132,14 @@ namespace Chip8
 
         private void OP_OOEE()
         {
-            _programCounter = _stack[--_stackPointer];
+            --_stackPointer;
+            _programCounter = _stack[_stackPointer];
             _instruction = "RET";
         }
 
         private void OP_1nnn()
         {
-            var address = (ushort)(_opcode & 0x0FFFu);
+            var address = (ushort) (_opcode & 0x0FFFu);
             _programCounter = address;
             _instruction = $"JP {address:X3}";
         }
@@ -145,9 +147,10 @@ namespace Chip8
 
         private void OP_2nnn()
         {
-            var address = (ushort)(_opcode & 0x0FFFu);
-            _stack[++_stackPointer] = _programCounter;
+            var address = (ushort) (_opcode & 0x0FFFu);
+            _stack[_stackPointer] = _programCounter;
             _programCounter = address;
+            _stackPointer++;
             _instruction = $"CALL {address:X3}";
         }
 
@@ -284,8 +287,8 @@ namespace Chip8
             var y = (byte) ((_opcode & 0x00F0) >> 4);
             var sum = _vRegisters[x] + _vRegisters[y];
 
-            _vRegisters[0xF] = (byte)(sum > 0xFF ? 1 : 0);
-            _vRegisters[x] = (byte)(sum & 0xFF);
+            _vRegisters[0xF] = (byte) (sum > 0xFF ? 1 : 0);
+            _vRegisters[x] = (byte) (sum & 0xFF);
             _instruction = $"ADD V{x:X1}, V{y:X1}";
         }
 
@@ -304,9 +307,8 @@ namespace Chip8
             var x = (byte) ((_opcode & 0x0F00) >> 8);
             var y = (byte) ((_opcode & 0x00F0) >> 4);
 
-            _vRegisters[0xF] = (byte)(_vRegisters[x] & 0x1); // TODO: Comprehend this operation
-            _vRegisters[x] >>= 1;
-            _vRegisters[x] /= 2;
+            _vRegisters[0xF] = (byte) (_vRegisters[x] & 0x1u); // TODO: Comprehend this operation
+            _vRegisters[x] >>= 0x1;
             _instruction = $"SHR V{x:X1}, {{, V{y:X1}}}";
         }
 
@@ -344,14 +346,15 @@ namespace Chip8
 
         private void OP_Annn()
         {
-            _iRegister = (ushort) (_opcode & 0x0FFF);
-            _instruction = $"LD I, {_iRegister:X4}";
+            var address = (ushort) (_opcode & 0x0FFF);
+            _iRegister = address;
+            _instruction = $"LD I, {address:X4}";
         }
 
         private void OP_Bnnn()
         {
             var address = (_opcode & 0x0FFF);
-            _programCounter = (ushort)(_vRegisters[0] + address);
+            _programCounter = (ushort) (_vRegisters[0] + address);
             _instruction = $"JP V0, {address:X3}";
         }
 
@@ -385,6 +388,9 @@ namespace Chip8
 
                     if (spritePixel != 0)
                     {
+                        if (vRamAddress > _vram.Size)
+                            Console.WriteLine(vRamAddress);
+
                         if (_vram[vRamAddress] == 0xFF)
                             _vRegisters[0xF] = 1;
 
@@ -393,7 +399,6 @@ namespace Chip8
                 }
             }
 
-            //_programCounter += 2;
             _instruction = $"DRW V{x:X1}, V{y:X1}, {n:X1}";
         }
 
@@ -487,6 +492,8 @@ namespace Chip8
         {
             var x = (byte) (_opcode & 0x0F00);
 
+            _instruction = $"LD V{x:X1}, K";
+
             for (byte i = 0; i < 0xF; i++)
             {
                 if (_keypad.IsPressed(i))
@@ -497,7 +504,6 @@ namespace Chip8
             }
 
             _programCounter -= 2;
-            _instruction = $"LD V{x:X1}, K";
         }
 
         private void OP_Fx15()
@@ -533,13 +539,12 @@ namespace Chip8
         private void OP_Fx33()
         {
             var x = (byte) ((_opcode & 0x0F00) >> 8);
-            var value = _vRegisters[x];
+            var value = (byte) _vRegisters[x];
 
-
-            _ram[_iRegister + 2] = (byte)(value % 10);
+            _ram[_iRegister + 2] = (byte) (value % 10);
             value /= 10;
 
-            _ram[_iRegister + 1] = (byte)(value % 10);
+            _ram[_iRegister + 1] = (byte) (value % 10);
             value /= 10;
 
             _ram[_iRegister] = (byte)(value % 10);
