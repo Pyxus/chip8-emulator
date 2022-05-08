@@ -384,13 +384,10 @@ namespace Chip8
                 for (var yDraw = 0; yDraw < 8; ++yDraw)
                 {
                     var spritePixel = spriteByte & (0x80 >> yDraw);
-                    var vRamAddress = (yPos + xDraw) * Emulator.BaseWidth + (xPos + yDraw);
+                    var vRamAddress = ((yPos + xDraw) * (Emulator.BaseWidth) + (xPos + yDraw)) % (Emulator.BaseWidth * Emulator.BaseHeight);
 
                     if (spritePixel != 0)
                     {
-                        if (vRamAddress > _vram.Size)
-                            Console.WriteLine(vRamAddress);
-
                         if (_vram[vRamAddress] == 0xFF)
                             _vRegisters[0xF] = 1;
 

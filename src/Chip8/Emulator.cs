@@ -6,7 +6,7 @@ namespace Chip8
 
     public class Emulator
     {
-        public const long RefreshRate = (long) ((1 / 60.0) * TimeSpan.TicksPerSecond);
+        public const long RefreshRate = (long) ((1 / 240.0) * TimeSpan.TicksPerSecond);
         public const ushort InterpreterEndAddress = 0x200;
         public const byte FontStartAddress = 0x000;
         public const int BaseWidth = 64;
@@ -22,7 +22,7 @@ namespace Chip8
 
         public Emulator()
         {
-            App = new RenderWindow(new VideoMode(BaseWidth * 15, BaseHeight * 15), "Chip8 - Display");
+            App = new RenderWindow(new VideoMode(BaseWidth * 8, BaseHeight * 8), "Chip8 - Display");
             App.Resized += OnWindowResized;
             App.KeyPressed += OnWindowKeyPressed;
             App.Closed += OnWindowClosed;
@@ -98,7 +98,6 @@ namespace Chip8
                     Cpu.Cycle();
                     accumulator -= RefreshRate;
                 }
-
                 Render();
             }
         }
