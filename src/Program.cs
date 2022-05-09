@@ -5,7 +5,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        var fileArg = new Argument<FileInfo>("file", "Path to chip8 program file.");
+        var fileArg = new Argument<FileInfo>("rom", "Path to chip8 rom file.");
         var runCommand = new Command("run", "Run Chip8 program");
         runCommand.AddArgument(fileArg);
         runCommand.SetHandler(() =>{
