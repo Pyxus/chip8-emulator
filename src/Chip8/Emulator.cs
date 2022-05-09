@@ -19,10 +19,12 @@ namespace Chip8
         protected Keypad Keypad;
 
         private bool _isProgramLoaded;
+        private byte[] _programData = new byte[0];
+        private string _programName = "";
 
         public Emulator()
         {
-            App = new RenderWindow(new VideoMode(BaseWidth * 8, BaseHeight * 8), "Chip8 - Display");
+            App = new RenderWindow(new VideoMode(BaseWidth * 8, BaseHeight * 8), "Chip8 - Display", Styles.Titlebar | Styles.Close);
             App.Resized += OnWindowResized;
             App.KeyPressed += OnWindowKeyPressed;
             App.Closed += OnWindowClosed;
@@ -77,6 +79,8 @@ namespace Chip8
             
             App.SetTitle(programName);
             _isProgramLoaded = true;
+            _programData = bytes;
+            _programName = programName;
         }
 
         public virtual void Process()
@@ -168,6 +172,11 @@ namespace Chip8
             if (args.Code == Keyboard.Key.Escape)
             {
                 App.Close();
+            }
+            if (args.Code == Keyboard.Key.F5)
+            {
+                Initialize();
+                Load(_programData, _programName);
             }
         }
 

@@ -1,5 +1,5 @@
-using System.Drawing;
 using System.Text;
+using SFML.Audio;
 
 namespace Chip8
 {
@@ -18,6 +18,7 @@ namespace Chip8
         private string _instruction = "NULL";
         private Keypad _keypad;
         private Random _random = new Random();
+        private Sound sound = new Sound(new SoundBuffer("assets/sounds/beep.wav"));
         private Dictionary<byte, Action> _opHandlers = new Dictionary<byte, Action>();
 
         public Cpu(Memory ram, Memory vram, Keypad keypad)
@@ -42,6 +43,9 @@ namespace Chip8
             _opHandlers.Add(0xD, OP_Dxyn);
             _opHandlers.Add(0xE, OP_Ex);
             _opHandlers.Add(0xF, OP_Fx);
+
+            sound.Volume = 40f;
+            sound.Loop = true;
         }
 
         public void Reset()
@@ -61,7 +65,14 @@ namespace Chip8
                 _delayTimer--;
 
             if (_soundTimer > 0)
+            {
                 _soundTimer--;
+                sound.Play();
+            }
+            else
+            {
+                sound.Stop();
+            }
         }
 
         public string Dump()
@@ -149,8 +160,8 @@ namespace Chip8
         {
             var address = (ushort) (_opcode & 0x0FFFu);
             _stack[_stackPointer] = _programCounter;
+            ++_stackPointer;
             _programCounter = address;
-            _stackPointer++;
             _instruction = $"CALL {address:X3}";
         }
 
@@ -163,6 +174,7 @@ namespace Chip8
             {
                 _programCounter += 2;
             }
+
             _instruction = $"SE V{x:X1}, {kk:X3}";
         }
 
@@ -175,6 +187,7 @@ namespace Chip8
             {
                 _programCounter += 2;
             }
+
             _instruction = $"SNE V{x:X1}, {kk:X3}";
         }
 
@@ -187,6 +200,7 @@ namespace Chip8
             {
                 _programCounter += 2;
             }
+
             _instruction = $"SE V{x:X1}, V{y:X1}";
         }
 
@@ -317,8 +331,8 @@ namespace Chip8
             var x = (byte) ((_opcode & 0x0F00) >> 8);
             var y = (byte) ((_opcode & 0x00F0) >> 4);
 
-            _vRegisters[0xF] = (byte)(_vRegisters[y] > _vRegisters[x] ? 1 : 0);
-            _vRegisters[x] = (byte)(_vRegisters[y] - _vRegisters[x]);
+            _vRegisters[0xF] = (byte) (_vRegisters[y] > _vRegisters[x] ? 1 : 0);
+            _vRegisters[x] = (byte) (_vRegisters[y] - _vRegisters[x]);
             _instruction = $"SUBN V{x:X1}, V{y:X1}";
         }
 
@@ -327,7 +341,7 @@ namespace Chip8
             var x = (byte) ((_opcode & 0x0F00) >> 8);
             var y = (byte) ((_opcode & 0x00F0) >> 4);
 
-            _vRegisters[0xF] = (byte)((_vRegisters[x] & 0x80) >> 7); // TODO: Comprehend this operation
+            _vRegisters[0xF] = (byte) ((_vRegisters[x] & 0x80) >> 7); // TODO: Comprehend this operation
             _vRegisters[x] <<= 1;
             _instruction = $"SHL V{x:X1}, {{, V{y:X1}}}";
         }
@@ -491,7 +505,7 @@ namespace Chip8
 
             _instruction = $"LD V{x:X1}, K";
 
-            for (byte i = 0; i < 0xF; i++)
+            for (byte i = 0; i <= 0xF; i++)
             {
                 if (_keypad.IsPressed(i))
                 {
@@ -553,7 +567,7 @@ namespace Chip8
         {
             var x = (byte) ((_opcode & 0x0F00) >> 8);
 
-            for (byte i = 0; i <= x; i++)
+            for (byte i = 0; i <= x; ++i)
             {
                 _ram[_iRegister + i] = _vRegisters[i];
             }
@@ -565,7 +579,7 @@ namespace Chip8
         {
             var x = (byte) ((_opcode & 0x0F00) >> 8);
 
-            for (byte i = 0; i <= x; i++)
+            for (byte i = 0; i <= x; ++i)
             {
                 _vRegisters[i] = _ram[_iRegister + i];
             }

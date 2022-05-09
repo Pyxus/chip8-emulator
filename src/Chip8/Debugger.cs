@@ -22,9 +22,7 @@ public class Debugger : Emulator
 
         public Debugger(bool startPaused = false)
         {
-            var sFile = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\src\Chip8\fonts\JetBrainsMono-Regular.ttf");
-            var sFilePath = Path.GetFullPath(sFile);
-            var font = new Font(sFilePath);
+            var font = new Font("assets/fonts/JetBrainsMono-Regular.ttf");
 
             _isPaused = startPaused;
             _debugerApp = new RenderWindow(new VideoMode(1280, 720), "Chip8 - Debugger");

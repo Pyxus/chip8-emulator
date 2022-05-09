@@ -3,13 +3,19 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
+    <PublishSingleFile>true</PublishSingleFile>
     <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+    <PublishTrimmed>true</PublishTrimmed>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="SFML.Net" Version="2.5.0" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta3.22114.1" />
+    <Content Include="build\assets\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory> 
+    </Content> 
     <Content Include="src\Chip8\Emulator.cs" />
     <Content Include="src\Chip8\Memory.cs" />
     <Content Include="src\Chip8\Display.cs" />
