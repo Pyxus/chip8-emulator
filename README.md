@@ -41,3 +41,9 @@ z x c v
 **Spacebar** - Pause emulator
 
 **Right Arrow** - Step forward when paused
+
+# Credits
+
+- [Chip8 Technical specifications](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM)
+
+- [Chip8 ROMs](https://github.com/kripod/chip8-roms)
