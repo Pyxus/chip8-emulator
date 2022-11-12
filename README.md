@@ -31,7 +31,7 @@ z x c v
 ### Controls
 **F5** - Reload program
 
-#### Debug Controls
+### Debug Controls
 *NOTE: Must be performed inside debugger window*
 
 **Mouse Scroll or Up/Down Arrow Keys** - Scroll through memory map
@@ -40,4 +40,4 @@ z x c v
 
 **Spacebar** - Pause emulator
 
-**Right ARrow** - Step forward when paused
+**Right Arrow** - Step forward when paused
