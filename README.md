@@ -1,6 +1,6 @@
 # Chip8 Interpreter
 <p align="center">
-    <img src="docs/example.gif" width="500" alt="Godot Engine logo">
+    <img src="docs/example.gif" width="500" alt="Interpreter demo">
 </p>
 
 ## About
