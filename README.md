@@ -1,6 +1,6 @@
 # Chip8 Interpreter
 <p align="center">
-    <img src="docs/example.gif" width="500" alt="Interpreter demo">
+    <img src="docs/example.gif" alt="Interpreter demo">
 </p>
 
 ## About
